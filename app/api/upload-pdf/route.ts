@@ -1,5 +1,5 @@
 import { GeminiConfigError, pdfToMarkdown } from "@/lib/server/gemini";
-import { createDocumento } from "@/lib/server/documentos";
+import { createDocumento, verifyUser } from "@/lib/server/documentos";
 
 export const maxDuration = 120;
 
@@ -9,10 +9,17 @@ const MAX_BYTES = 14 * 1024 * 1024;
 /**
  * POST /api/upload-pdf  (multipart/form-data)
  *   file:       PDF (obligatorio)
- *   session_id: opcional; si falta se crea una sesión efímera (UUID)
+ * Header: Authorization: Bearer <token de sesión PocketBase> (obligatorio).
+ *   session_id de la entrada = id del usuario autenticado.
  * Convierte el PDF a Markdown con Gemini y guarda ambos en la misma entrada de `documentos`.
  */
 export async function POST(request: Request) {
+  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
+  const userId = token ? await verifyUser(token) : null;
+  if (!userId) {
+    return Response.json({ error: "Debes iniciar sesión para subir PDFs" }, { status: 401 });
+  }
+
   let form: FormData;
   try {
     form = await request.formData();
@@ -34,9 +41,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "El archivo no es un PDF válido" }, { status: 415 });
   }
 
-  const rawSession = form.get("session_id");
-  const sessionId =
-    typeof rawSession === "string" && /^[\w-]{8,64}$/.test(rawSession) ? rawSession : crypto.randomUUID();
+  const sessionId = userId;
 
   let markdown: string;
   try {

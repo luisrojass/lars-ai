@@ -1,61 +1,65 @@
 'use client';
 
 import { create } from 'zustand';
-import { UsuarioPrueba } from '@/types';
-import { USUARIOS_PRUEBA } from '@/data/mockQuestions';
+import { pb } from '@/lib/pocketbase';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+}
 
 interface AuthState {
-  user: UsuarioPrueba | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
-  usuariosDisponibles: UsuarioPrueba[];
-  loginAs: (usuario: UsuarioPrueba) => void;
-  login: (email: string, clave?: string) => Promise<{ success: boolean; error?: string }>;
+  /** true cuando ya se leyó la sesión persistida de PocketBase (evita parpadeos en SSR). */
+  ready: boolean;
+  modalOpen: boolean;
+  openModal: () => void;
+  closeModal: () => void;
+  /** Sincroniza el store con pb.authStore. Llamar una vez al montar la app. */
+  init: () => () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
+function toUser(): AuthUser | null {
+  const m = pb.authStore.record;
+  if (!pb.authStore.isValid || !m) return null;
+  const email = String(m.email ?? '');
+  return { id: m.id, email, name: String(m.username ?? m.name ?? email.split('@')[0]) };
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: USUARIOS_PRUEBA[0], // Por conveniencia para la demo inicial dejamos al docente o null según preferencia
-  isAuthenticated: true,
-  usuariosDisponibles: USUARIOS_PRUEBA,
+  user: null,
+  isAuthenticated: false,
+  ready: false,
+  modalOpen: false,
+  openModal: () => set({ modalOpen: true }),
+  closeModal: () => set({ modalOpen: false }),
 
-  loginAs: (usuario: UsuarioPrueba) => {
-    set({
-      user: usuario,
-      isAuthenticated: true
-    });
-  },
-
-  login: async (email: string) => {
-    const encontrado = USUARIOS_PRUEBA.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (encontrado) {
-      set({
-        user: encontrado,
-        isAuthenticated: true
-      });
-      return { success: true };
-    }
-
-    // Permitir cualquier usuario de prueba genérico
-    const nuevoUsuario: UsuarioPrueba = {
-      id: `usr_${Date.now()}`,
-      nombre: email.split('@')[0],
-      email: email,
-      rol: 'Estudiante',
-      avatar: '🎓',
-      descripcion: 'Usuario en sesión efímera'
+  init: () => {
+    const sync = () => {
+      const user = toUser();
+      set({ user, isAuthenticated: !!user, ready: true });
     };
-
-    set({
-      user: nuevoUsuario,
-      isAuthenticated: true
-    });
-    return { success: true };
+    sync();
+    // Valida/renueva el token persistido; si ya no sirve, cierra la sesión.
+    if (pb.authStore.isValid) {
+      pb.collection('users').authRefresh().catch(() => pb.authStore.clear());
+    }
+    return pb.authStore.onChange(sync);
   },
 
-  logout: () => {
-    set({
-      user: null,
-      isAuthenticated: false
-    });
-  }
+  login: async (email, password) => {
+    try {
+      await pb.collection('users').authWithPassword(email.trim(), password);
+      set({ modalOpen: false });
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Correo o contraseña incorrectos' };
+    }
+  },
+
+  logout: () => pb.authStore.clear(),
 }));

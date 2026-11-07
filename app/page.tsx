@@ -2,15 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MathFormula } from '@/components/math/MathFormula';
 import {
   Sparkles,
   ArrowRight,
   Brain,
   Projector,
   Zap,
-  BookOpen,
-  ShieldCheck
+  BookOpen
 } from 'lucide-react';
 
 export default function IntroPage() {
@@ -40,39 +38,15 @@ export default function IntroPage() {
           </p>
         </div>
 
-        {/* Mini Preview de Fórmulas KaTeX */}
-        <div className="flex flex-wrap items-center justify-center gap-3 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300 shadow-inner">
-          <span className="text-slate-500 text-[11px]">Modelado en vivo:</span>
-          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-sky-300">
-            <MathFormula math="f(x) = \sin(kx)" />
-          </span>
-          <span className="text-slate-600">•</span>
-          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-teal-300">
-            <MathFormula math="T(\vec{v}) = \lambda \vec{v}" />
-          </span>
-          <span className="text-slate-600">•</span>
-          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-indigo-300">
-            <MathFormula math="g''(x) = (4a^2 x^2 - 2a)e^{-ax^2}" />
-          </span>
-        </div>
-
-        {/* Botones de Navegación y Demostración Rápida */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md pt-2">
+        {/* Acción principal */}
+        <div className="flex items-center justify-center w-full max-w-md pt-2">
           <Link
-            href="/workspace"
+            href="/crear-clase"
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 via-teal-400 to-sky-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:scale-103 hover:shadow-sky-500/40 transition-all"
           >
             <BookOpen className="h-4 w-4" />
-            <span>Lanzar Demostración Interactiva</span>
+            <span>Crear una clase</span>
             <ArrowRight className="h-4 w-4 ml-0.5" />
-          </Link>
-
-          <Link
-            href="/login"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold text-sm border border-slate-800 hover:border-slate-700 transition-all"
-          >
-            <ShieldCheck className="h-4 w-4 text-sky-400" />
-            <span>Iniciar Sesión de Prueba</span>
           </Link>
         </div>
 

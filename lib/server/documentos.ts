@@ -8,10 +8,26 @@ export interface DocumentoRecord {
   contenido_md: string;
 }
 
-function client() {
+export function pbUrl() {
   const url = process.env.POCKETBASE_URL ?? process.env.NEXT_PUBLIC_POCKETBASE_URL;
   if (!url) throw new Error("POCKETBASE_URL no está configurada");
-  const pb = new PocketBase(url.replace(/\/_\/?$/, "").replace(/\/$/, ""));
+  return url.replace(/\/_\/?$/, "").replace(/\/$/, "");
+}
+
+/** Verifica el token de sesión de PocketBase (colección users). Devuelve el id del usuario o null. */
+export async function verifyUser(token: string): Promise<string | null> {
+  try {
+    const pb = new PocketBase(pbUrl());
+    pb.authStore.save(token, null);
+    const { record } = await pb.collection("users").authRefresh();
+    return record.id;
+  } catch {
+    return null;
+  }
+}
+
+function client() {
+  const pb = new PocketBase(pbUrl());
   pb.autoCancellation(false);
   return pb;
 }

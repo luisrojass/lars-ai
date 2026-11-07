@@ -12,7 +12,7 @@ export default function CrearClasePage() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono">
             <Layers className="h-3.5 w-3.5" />
-            <span>Vista 3: Crear Clase & Carga de Material</span>
+            <span>Crear Clase</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
             Transforma Material de Estudio en Experiencias 3B1B

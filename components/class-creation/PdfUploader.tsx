@@ -2,137 +2,152 @@
 
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { pb } from '@/lib/pocketbase';
 import { useAuthStore } from '@/store/useAuthStore';
-import { MathFormula } from '@/components/math/MathFormula';
-import {
-  UploadCloud,
-  FileText,
-  CheckCircle,
-  Loader2,
-  Lock,
-  ArrowRight,
-  Sparkles,
-  Layers,
-  FileCheck2
-} from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle, Loader2, Lock, ArrowRight, FileCheck2, AlertCircle, LogIn } from 'lucide-react';
 
-type EstadoProceso = 'inactivo' | 'cargando' | 'extrayendo' | 'generando' | 'completado';
+type Estado = 'inactivo' | 'subiendo' | 'procesando' | 'completado' | 'error';
+
+interface UploadResult {
+  document_id: string;
+  session_id: string;
+  pdf_file: string;
+  markdown_chars: number;
+}
+
+const MAX_MB = 14;
 
 export const PdfUploader: React.FC = () => {
   const router = useRouter();
-  const { user, isAuthenticated, loginAs, usuariosDisponibles } = useAuthStore();
+  const { isAuthenticated, ready, openModal } = useAuthStore();
 
   const [archivo, setArchivo] = useState<File | null>(null);
   const [estaArrastrando, setEstaArrastrando] = useState(false);
-  const [estado, setEstado] = useState<EstadoProceso>('inactivo');
+  const [estado, setEstado] = useState<Estado>('inactivo');
   const [progreso, setProgreso] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [resultado, setResultado] = useState<UploadResult | null>(null);
 
-  const formulasExtraidas = [
-    'f(x) = \\sin(k \\cdot x)',
-    'T(\\vec{v}) = A\\vec{v} = \\lambda \\vec{v}',
-    'g(x) = e^{-a x^2} \\implies g\'\'(x) = 0'
-  ];
+  const reiniciar = () => {
+    setArchivo(null);
+    setEstado('inactivo');
+    setProgreso(0);
+    setError(null);
+    setResultado(null);
+  };
 
-  const iniciarProcesamiento = useCallback((file: File) => {
+  const subir = useCallback((file: File) => {
+    if (!(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+      setError('Sube únicamente archivos en formato PDF.');
+      setEstado('error');
+      setArchivo(file);
+      return;
+    }
+    if (file.size > MAX_MB * 1024 * 1024) {
+      setError(`El PDF supera el máximo de ${MAX_MB} MB.`);
+      setEstado('error');
+      setArchivo(file);
+      return;
+    }
+
     setArchivo(file);
-    setEstado('cargando');
-    setProgreso(15);
+    setError(null);
+    setProgreso(0);
+    setEstado('subiendo');
 
-    // Etapa 1: Cargando PDF
-    setTimeout(() => {
-      setProgreso(35);
-      setEstado('extrayendo');
+    const body = new FormData();
+    body.set('file', file);
 
-      // Etapa 2: Extrayendo texto y fórmulas
-      setTimeout(() => {
-        setProgreso(75);
-        setEstado('generando');
-
-        // Etapa 3: Generando preguntas
-        setTimeout(() => {
-          setProgreso(100);
-          setEstado('completado');
-        }, 1200);
-      }, 1400);
-    }, 1000);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload-pdf');
+    xhr.setRequestHeader('Authorization', `Bearer ${pb.authStore.token}`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) setProgreso(Math.round((e.loaded / e.total) * 100));
+    };
+    // Subida terminada: el servidor convierte a Markdown (Gemini) y guarda en PocketBase.
+    xhr.upload.onload = () => {
+      setProgreso(100);
+      setEstado('procesando');
+    };
+    xhr.onerror = () => {
+      setError('No se pudo conectar con el servidor.');
+      setEstado('error');
+    };
+    xhr.onload = () => {
+      let data: (UploadResult & { error?: string }) | null = null;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {}
+      if (xhr.status === 201 && data) {
+        setResultado(data);
+        setEstado('completado');
+      } else {
+        setError(data?.error ?? `Error inesperado (${xhr.status}).`);
+        setEstado('error');
+      }
+    };
+    xhr.send(body);
   }, []);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (!isAuthenticated) return;
-    setEstaArrastrando(true);
-  };
-
-  const handleDragLeave = () => {
-    setEstaArrastrando(false);
-  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setEstaArrastrando(false);
-    if (!isAuthenticated) return;
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        iniciarProcesamiento(file);
-      } else {
-        alert('Por favor suba únicamente archivos en formato PDF.');
-      }
-    }
+    const file = e.dataTransfer.files?.[0];
+    if (file) subir(file);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      iniciarProcesamiento(file);
-    }
+    const file = e.target.files?.[0];
+    if (file) subir(file);
+    e.target.value = '';
   };
 
-  // Bloqueo de sesión efímera
-  if (!isAuthenticated || !user) {
+  // Sin sesión de PocketBase no se puede subir
+  if (!ready || !isAuthenticated) {
     return (
       <div className="w-full max-w-2xl mx-auto p-8 rounded-2xl bg-slate-900/90 border border-rose-500/30 text-center space-y-6 shadow-2xl backdrop-blur-md">
         <div className="mx-auto w-14 h-14 rounded-full bg-rose-500/10 border border-rose-500/40 flex items-center justify-center text-rose-400">
           <Lock className="h-7 w-7" />
         </div>
-
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-slate-100">
-            Acceso Restringido a Carga de Material
-          </h3>
+          <h3 className="text-xl font-bold text-slate-100">Inicia sesión para subir material</h3>
           <p className="text-sm text-slate-400 max-w-md mx-auto">
-            Por política de seguridad de ENEISOFT XVI, la subida y procesamiento
-            de PDFs requiere una sesión activa. Seleccione un usuario de prueba:
+            La subida y procesamiento de PDFs requiere una sesión activa.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          {usuariosDisponibles.map((u) => (
-            <button
-              key={u.id}
-              onClick={() => loginAs(u)}
-              className="p-3.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-sky-500 transition-all text-left group"
-            >
-              <div className="text-2xl mb-1">{u.avatar}</div>
-              <div className="text-xs font-bold text-slate-200 group-hover:text-sky-400">
-                {u.nombre}
-              </div>
-              <div className="text-[10px] text-slate-400 font-mono">{u.rol}</div>
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={openModal}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-sm transition-colors"
+        >
+          <LogIn className="h-4 w-4" />
+          <span>Iniciar sesión</span>
+        </button>
       </div>
     );
   }
 
+  const paso = (activo: boolean, hecho: boolean) =>
+    `p-3.5 rounded-xl border transition-all ${
+      activo
+        ? 'bg-sky-500/15 border-sky-400 ring-1 ring-sky-500/30'
+        : hecho
+        ? 'bg-slate-950 border-teal-500/40 text-teal-300'
+        : 'bg-slate-950/40 border-slate-800 text-slate-500'
+    }`;
+
+  const subiendo = estado === 'subiendo';
+  const procesando = estado === 'procesando';
+  const completado = estado === 'completado';
+
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6">
-      {/* Zona Drag & Drop */}
       {estado === 'inactivo' && (
         <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setEstaArrastrando(true);
+          }}
+          onDragLeave={() => setEstaArrastrando(false)}
           onDrop={handleDrop}
           className={`relative border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 cursor-pointer ${
             estaArrastrando
@@ -142,16 +157,14 @@ export const PdfUploader: React.FC = () => {
         >
           <input
             type="file"
-            accept=".pdf"
+            accept=".pdf,application/pdf"
             onChange={handleFileChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-
           <div className="flex flex-col items-center justify-center space-y-4">
             <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/30 text-sky-400 shadow-md">
               <UploadCloud className="h-10 w-10 animate-bounce" />
             </div>
-
             <div className="space-y-1">
               <h3 className="text-base sm:text-lg font-bold text-slate-200">
                 Arrastra tu archivo PDF o haz clic para seleccionarlo
@@ -160,19 +173,16 @@ export const PdfUploader: React.FC = () => {
                 Soporta material de estudio: diapositivas, exámenes, sílabos o apuntes
               </p>
             </div>
-
             <div className="flex items-center gap-2 text-xs font-mono text-slate-500 bg-slate-950 px-3 py-1 rounded-full border border-slate-800">
               <FileText className="h-3.5 w-3.5 text-sky-400" />
-              <span>Formato admitido: PDF (Máx. 50 MB)</span>
+              <span>Formato admitido: PDF (Máx. {MAX_MB} MB)</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Indicadores de Estado de Procesamiento */}
       {estado !== 'inactivo' && (
         <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 shadow-2xl">
-          {/* Header del archivo cargado */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-lg bg-red-500/10 text-rose-400 border border-rose-500/30">
@@ -180,142 +190,80 @@ export const PdfUploader: React.FC = () => {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-slate-200 truncate max-w-[280px] sm:max-w-md">
-                  {archivo ? archivo.name : 'Material_Calculo_Vectorial_2026.pdf'}
+                  {archivo?.name}
                 </h4>
                 <span className="text-[11px] font-mono text-slate-400">
-                  {archivo ? `${(archivo.size / 1024 / 1024).toFixed(2)} MB` : '3.42 MB'} • Procesado por Thea Engine
+                  {archivo ? `${(archivo.size / 1024 / 1024).toFixed(2)} MB` : ''}
                 </span>
               </div>
             </div>
 
-            {estado === 'completado' ? (
+            {completado ? (
               <span className="flex items-center gap-1 text-xs font-mono text-teal-400 bg-teal-950 px-2.5 py-1 rounded-full border border-teal-800">
                 <CheckCircle className="h-3.5 w-3.5" /> Listo
               </span>
+            ) : estado === 'error' ? (
+              <span className="flex items-center gap-1 text-xs font-mono text-rose-400 bg-rose-950 px-2.5 py-1 rounded-full border border-rose-800">
+                <AlertCircle className="h-3.5 w-3.5" /> Error
+              </span>
             ) : (
               <span className="flex items-center gap-1.5 text-xs font-mono text-sky-400 bg-sky-950 px-2.5 py-1 rounded-full border border-sky-800">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> {progreso}%
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> {subiendo ? `${progreso}%` : 'Procesando'}
               </span>
             )}
           </div>
 
-          {/* Barra de Progreso */}
-          <div className="space-y-1.5">
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-sky-500 via-teal-400 to-indigo-500 transition-all duration-300"
-                style={{ width: `${progreso}%` }}
-              />
+          {estado === 'error' ? (
+            <div className="space-y-4">
+              <p className="text-sm text-rose-300" role="alert">{error}</p>
+              <button
+                onClick={reiniciar}
+                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 transition-colors"
+              >
+                Intentar de nuevo
+              </button>
             </div>
-          </div>
-
-          {/* Los 3 Indicadores de Estado Requeridos */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Estado 1: Cargando PDF */}
-            <div
-              className={`p-3.5 rounded-xl border transition-all ${
-                estado === 'cargando'
-                  ? 'bg-sky-500/15 border-sky-400 ring-1 ring-sky-500/30'
-                  : estado === 'extrayendo' || estado === 'generando' || estado === 'completado'
-                  ? 'bg-slate-950 border-teal-500/40 text-teal-300'
-                  : 'bg-slate-950/40 border-slate-800 text-slate-500'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                {estado === 'cargando' ? (
-                  <Loader2 className="h-4 w-4 text-sky-400 animate-spin" />
-                ) : (
-                  <CheckCircle className="h-4 w-4 text-teal-400" />
-                )}
-                <span className="text-xs font-bold">1. Cargando PDF</span>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={paso(subiendo, procesando || completado)}>
+                <div className="flex items-center gap-2 mb-1">
+                  {subiendo ? (
+                    <Loader2 className="h-4 w-4 text-sky-400 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 text-teal-400" />
+                  )}
+                  <span className="text-xs font-bold">1. Subiendo PDF</span>
+                </div>
+                <p className="text-[10px] text-slate-400">Envío seguro con tu sesión activa.</p>
               </div>
-              <p className="text-[10px] text-slate-400">
-                Lectura y verificación de integridad de documento.
-              </p>
-            </div>
 
-            {/* Estado 2: Extrayendo texto y fórmulas */}
-            <div
-              className={`p-3.5 rounded-xl border transition-all ${
-                estado === 'extrayendo'
-                  ? 'bg-sky-500/15 border-sky-400 ring-1 ring-sky-500/30'
-                  : estado === 'generando' || estado === 'completado'
-                  ? 'bg-slate-950 border-teal-500/40 text-teal-300'
-                  : 'bg-slate-950/40 border-slate-800 text-slate-500'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                {estado === 'extrayendo' ? (
-                  <Loader2 className="h-4 w-4 text-sky-400 animate-spin" />
-                ) : estado === 'generando' || estado === 'completado' ? (
-                  <CheckCircle className="h-4 w-4 text-teal-400" />
-                ) : (
-                  <div className="h-4 w-4 rounded-full border border-slate-600" />
-                )}
-                <span className="text-xs font-bold">2. Extrayendo texto y fórmulas</span>
-              </div>
-              <p className="text-[10px] text-slate-400">
-                Segmentación KaTeX y modelos matemáticos.
-              </p>
-            </div>
-
-            {/* Estado 3: Generando preguntas */}
-            <div
-              className={`p-3.5 rounded-xl border transition-all ${
-                estado === 'generando'
-                  ? 'bg-sky-500/15 border-sky-400 ring-1 ring-sky-500/30'
-                  : estado === 'completado'
-                  ? 'bg-slate-950 border-teal-500/40 text-teal-300'
-                  : 'bg-slate-950/40 border-slate-800 text-slate-500'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                {estado === 'generando' ? (
-                  <Loader2 className="h-4 w-4 text-sky-400 animate-spin" />
-                ) : estado === 'completado' ? (
-                  <CheckCircle className="h-4 w-4 text-teal-400" />
-                ) : (
-                  <div className="h-4 w-4 rounded-full border border-slate-600" />
-                )}
-                <span className="text-xs font-bold">3. Generando preguntas</span>
-              </div>
-              <p className="text-[10px] text-slate-400">
-                Ensamblado con esquemas 3B1B de cero latencia.
-              </p>
-            </div>
-          </div>
-
-          {/* Vista previa en vivo de fórmulas extraídas */}
-          {(estado === 'extrayendo' || estado === 'generando' || estado === 'completado') && (
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-              <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3 text-sky-400" /> Fórmulas detectadas en el documento:
-              </span>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {formulasExtraidas.map((tex, i) => (
-                  <div
-                    key={i}
-                    className="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-xs text-sky-300"
-                  >
-                    <MathFormula math={`$${tex}$`} />
-                  </div>
-                ))}
+              <div className={paso(procesando, completado)}>
+                <div className="flex items-center gap-2 mb-1">
+                  {procesando ? (
+                    <Loader2 className="h-4 w-4 text-sky-400 animate-spin" />
+                  ) : completado ? (
+                    <CheckCircle className="h-4 w-4 text-teal-400" />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full border border-slate-600" />
+                  )}
+                  <span className="text-xs font-bold">2. Convirtiendo y guardando</span>
+                </div>
+                <p className="text-[10px] text-slate-400">Extracción a Markdown con fórmulas y guardado.</p>
               </div>
             </div>
           )}
 
-          {/* Botón de Entrada al Workspace al Completar */}
-          {estado === 'completado' && (
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in-up">
+          {completado && resultado && (
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
               <span className="text-xs text-slate-300 flex items-center gap-1.5">
                 <FileCheck2 className="h-4 w-4 text-teal-400" />
-                Batería generada con 3 preguntas interactivas y retroalimentación socrática.
+                Documento guardado ({resultado.markdown_chars.toLocaleString('es')} caracteres de texto extraído).
               </span>
               <button
-                onClick={() => router.push('/workspace')}
+                onClick={() => router.push(`/clase/${resultado.document_id}`)}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/20 hover:scale-102 transition-transform"
               >
-                <span>Entrar al Workspace de Estudio</span>
+                <span>Ver preguntas generadas</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
