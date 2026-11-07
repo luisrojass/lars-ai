@@ -46,7 +46,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     sync();
     // Valida/renueva el token persistido; si ya no sirve, cierra la sesión.
     if (pb.authStore.isValid) {
-      pb.collection('users').authRefresh().catch(() => pb.authStore.clear());
+      pb.collection('users')
+        .authRefresh()
+        .catch(() => pb.collection('_superusers').authRefresh())
+        .catch(() => pb.authStore.clear());
     }
     return pb.authStore.onChange(sync);
   },
@@ -57,7 +60,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ modalOpen: false });
       return { success: true };
     } catch {
-      return { success: false, error: 'Correo o contraseña incorrectos' };
+      try {
+        await pb.collection('_superusers').authWithPassword(email.trim(), password);
+        set({ modalOpen: false });
+        return { success: true };
+      } catch {
+        return { success: false, error: 'Correo o contraseña incorrectos' };
+      }
     }
   },
 

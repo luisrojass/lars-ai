@@ -14,13 +14,18 @@ export function pbUrl() {
   return url.replace(/\/_\/?$/, "").replace(/\/$/, "");
 }
 
-/** Verifica el token de sesión de PocketBase (colección users). Devuelve el id del usuario o null. */
+/** Verifica el token de sesión de PocketBase (colección users o _superusers). Devuelve el id del usuario o null. */
 export async function verifyUser(token: string): Promise<string | null> {
   try {
     const pb = new PocketBase(pbUrl());
     pb.authStore.save(token, null);
-    const { record } = await pb.collection("users").authRefresh();
-    return record.id;
+    try {
+      const { record } = await pb.collection("users").authRefresh();
+      return record.id;
+    } catch {
+      const { record } = await pb.collection("_superusers").authRefresh();
+      return record.id;
+    }
   } catch {
     return null;
   }

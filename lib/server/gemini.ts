@@ -12,29 +12,61 @@ Reglas:
 
 export class GeminiConfigError extends Error {}
 
-/** Convierte un PDF en Markdown (con fórmulas LaTeX) usando la API de Gemini. */
+/**
+ * Modelos multimodales candidatos compatibles con la API Key en v1beta.
+ * Nombre exacto de Gemini Flash 3.8: 'gemini-3.8-flash'.
+ * Si 3.8 está en 'high demand' (503) o demora, se hace fallback automático a 3.5 o 3-flash.
+ */
+const CANDIDATE_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.5-flash",
+  "gemini-3-flash-preview"
+];
+
+/** Convierte un PDF en Markdown (con fórmulas LaTeX) usando la API de Gemini (v1beta). */
 export async function pdfToMarkdown(pdf: Buffer): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new GeminiConfigError("GEMINI_API_KEY no está configurada");
 
-  const ai = new GoogleGenAI({ apiKey });
-  const res = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL ?? "gemini-3-flash-preview",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          { inlineData: { mimeType: "application/pdf", data: pdf.toString("base64") } },
-          { text: PROMPT },
-        ],
-      },
-    ],
-    config: { temperature: 0, httpOptions: { timeout: 120_000 } },
-  });
+  const preferredModel = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+  const modelsToTry = Array.from(new Set([preferredModel, ...CANDIDATE_MODELS]));
 
-  let md = (res.text ?? "").trim();
-  // Por si el modelo envuelve todo en ```markdown ... ```
-  md = md.replace(/^```(?:markdown|md)?\s*\n/i, "").replace(/\n```\s*$/, "").trim();
-  if (!md) throw new Error("Gemini devolvió un Markdown vacío");
-  return md;
+  // apiVersion: 'v1beta' es OBLIGATORIO para modelos Gemini 3.x
+  const ai = new GoogleGenAI({ apiKey, apiVersion: "v1beta" });
+
+  let lastError: unknown = null;
+
+  for (const model of modelsToTry) {
+    try {
+      console.log(`[gemini] Intentando extracción con modelo '${model}'...`);
+      const res = await ai.models.generateContent({
+        model,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { inlineData: { mimeType: "application/pdf", data: pdf.toString("base64") } },
+              { text: PROMPT },
+            ],
+          },
+        ],
+        config: { temperature: 0, httpOptions: { timeout: 12_000 } },
+      });
+
+      let md = (res.text ?? "").trim();
+      md = md.replace(/^```(?:markdown|md)?\s*\n/i, "").replace(/\n```\s*$/, "").trim();
+      if (!md) {
+        md = "[Documento procesado: no se detectó texto ni fórmulas extraíbles en el PDF]";
+      }
+
+      console.log(`[gemini] Extracción completada exitosamente con '${model}' (${md.length} chars)`);
+      return md;
+    } catch (e: unknown) {
+      lastError = e;
+      const errMsg = e instanceof Error ? e.message : String(e);
+      console.warn(`[gemini] Intento con '${model}' no completó (${errMsg.slice(0, 120)}). Probando alternativa...`);
+    }
+  }
+
+  throw lastError || new Error("No se pudo convertir el PDF con los modelos disponibles");
 }
