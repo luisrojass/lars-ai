@@ -1,0 +1,270 @@
+Para que el motor gráfico en el frontend sea determinista y no falle en la demo, se definen tres arquetipos de simulación matemáticos: en 2D con **Mafs.dev**. Todos los arquetipos consumen cadenas evaluables mediante `math.js` y definen entre 1 y 2 *sliders* reactivos.
+
+---
+
+### Arquetipo 1: `CALCULUS_DERIVATIVE_TANGENT_2D` (Mafs.dev)
+
+* **Tema:** Cálculo diferencial (Recta tangente, razón de cambio instantánea y aproximación lineal).
+* **Elementos en pantalla:**
+* Curva principal $f(x)$ (trazo sólido).
+* Recta tangente correcta en $x_0$ (azul `#0284C7`).
+* Recta diagnóstica errónea del estudiante (rojo `#E11D48`, discontinua).
+* Punto de tangencia $(x_0, f(x_0))$ móvil.
+
+
+* **Sliders (2 variables):**
+1. $x_0$: Posición de evaluación sobre el eje $X$.
+2. $h$: Incremento o paso de la secante que converge a la tangente.
+
+
+
+#### Estructura JSON:
+
+```json
+{
+  "archetype": "CALCULUS_DERIVATIVE_TANGENT_2D",
+  "engine": "mafs",
+  "view": {
+    "x_bounds": [-4, 6],
+    "y_bounds": [-2, 8],
+    "grid_step": 1
+  },
+  "functions": {
+    "target": "0.5 * x^2 - x + 1",
+    "correct_derivative": "x - 1",
+    "error_derivative": "0.5 * x - 1"
+  },
+  "interactive_point": {
+    "symbol": "x_0",
+    "default_value": 2
+  },
+  "sliders": [
+    {
+      "id": "x_0",
+      "symbol": "x_0",
+      "label": "Punto de Tangencia (x₀)",
+      "min": -2.0,
+      "max": 4.0,
+      "step": 0.25,
+      "default": 2.0
+    },
+    {
+      "id": "h",
+      "symbol": "h",
+      "label": "Paso Secante (h)",
+      "min": 0.05,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.1
+    }
+  ],
+  "render_layers": [
+    {
+      "type": "plot",
+      "fn": "target",
+      "color": "#334155",
+      "style": "solid",
+      "weight": 3
+    },
+    {
+      "type": "tangent_line",
+      "role": "correct",
+      "fn_source": "target",
+      "slope_expr": "correct_derivative",
+      "eval_at": "x_0",
+      "color": "#0284C7",
+      "style": "solid",
+      "weight": 3.5,
+      "label": "Derivada Real"
+    },
+    {
+      "type": "tangent_line",
+      "role": "error",
+      "fn_source": "target",
+      "slope_expr": "error_derivative",
+      "eval_at": "x_0",
+      "color": "#E11D48",
+      "style": "dashed",
+      "weight": 3,
+      "label": "Tu Hipótesis"
+    }
+  ]
+}
+
+```
+
+---
+
+### Arquetipo 2: `CALCULUS_INTEGRAL_AREA_2D` (Mafs.dev)
+
+* **Tema:** Cálculo integral (Sumas de Riemann, integrales definidas y cálculo de áreas bajo la curva).
+* **Elementos en pantalla:**
+* Función continua $f(x)$.
+* Región sombreada del área exacta calculada (azul translúcido).
+* Rectángulos de Riemann calculados por el estudiante con límites erróneos o discretización defectuosa (rojo semitransparente).
+
+
+* **Sliders (2 variables):**
+1. $b$: Límite superior del intervalo de integración $[a, b]$.
+2. $n$: Número de particiones de rectángulos.
+
+
+
+#### Estructura JSON:
+
+```json
+{
+  "archetype": "CALCULUS_INTEGRAL_AREA_2D",
+  "engine": "mafs",
+  "view": {
+    "x_bounds": [-1, 7],
+    "y_bounds": [-1, 6],
+    "grid_step": 1
+  },
+  "functions": {
+    "target": "sin(x) + 2"
+  },
+  "interval": {
+    "lower_bound": 0
+  },
+  "sliders": [
+    {
+      "id": "b",
+      "symbol": "b",
+      "label": "Límite Superior (b)",
+      "min": 1.0,
+      "max": 6.0,
+      "step": 0.5,
+      "default": 4.5
+    },
+    {
+      "id": "n",
+      "symbol": "n",
+      "label": "Particiones Riemann (n)",
+      "min": 2,
+      "max": 30,
+      "step": 1,
+      "default": 8
+    }
+  ],
+  "render_layers": [
+    {
+      "type": "plot",
+      "fn": "target",
+      "color": "#334155",
+      "style": "solid",
+      "weight": 3
+    },
+    {
+      "type": "integral_fill",
+      "role": "correct",
+      "fn": "target",
+      "from": "0",
+      "to": "b",
+      "fill_color": "rgba(2, 132, 199, 0.25)",
+      "border_color": "#0284C7"
+    },
+    {
+      "type": "riemann_rectangles",
+      "role": "error",
+      "fn": "target",
+      "from": "0",
+      "to": "b",
+      "partitions": "n",
+      "method": "left",
+      "fill_color": "rgba(225, 29, 72, 0.2)",
+      "border_color": "#E11D48"
+    }
+  ]
+}
+
+```
+
+---
+
+### Arquetipo 3: `LINEAR_TRANSFORMATION_GRID_2D` (Mafs.dev)
+
+* **Tema:** Álgebra lineal (Transformaciones lineales, vectores base $\hat{i}, \hat{j}$, deformación de cuadrícula y autovectores).
+* **Elementos en pantalla:**
+* Cuadrícula euclidiana de fondo transformándose bajo la matriz $M$.
+* Vectores base $\hat{i}$ y $\hat{j}$ transformados.
+* Vector resultante de la operación correcta vs. vector resultante de la respuesta errónea del estudiante.
+
+
+* **Sliders (2 variables):**
+1. $t$: Factor de interpolación temporal $t \in [0, 1]$ para animar suavemente la transición de la matriz Identidad $I$ hacia la matriz de transformación $M$.
+2. $k$: Parámetro escalar que escala el vector o modifica un coeficiente de la matriz.
+
+
+
+#### Estructura JSON:
+
+```json
+{
+  "archetype": "LINEAR_TRANSFORMATION_GRID_2D",
+  "engine": "mafs",
+  "view": {
+    "x_bounds": [-5, 5],
+    "y_bounds": [-5, 5],
+    "grid_step": 1
+  },
+  "matrices": {
+    "identity": [[1, 0], [0, 1]],
+    "correct_transform": [[2, 1], [-1, 1]],
+    "error_transform": [[1, 2], [1, -1]]
+  },
+  "input_vector": [1, 2],
+  "sliders": [
+    {
+      "id": "t",
+      "symbol": "t",
+      "label": "Animar Transformación",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "id": "k",
+      "symbol": "k",
+      "label": "Escalar Vector (k)",
+      "min": 0.5,
+      "max": 2.5,
+      "step": 0.25,
+      "default": 1.0
+    }
+  ],
+  "render_layers": [
+    {
+      "type": "deformed_grid",
+      "matrix_source": "correct_transform",
+      "interpolation_var": "t",
+      "line_color": "#CBD5E1",
+      "weight": 1.5
+    },
+    {
+      "type": "vector",
+      "role": "correct",
+      "origin": [0, 0],
+      "expr": "k * (correct_transform * input_vector)",
+      "color": "#0284C7",
+      "label": "T(v) Correcto",
+      "weight": 3.5
+    },
+    {
+      "type": "vector",
+      "role": "error",
+      "origin": [0, 0],
+      "expr": "k * (error_transform * input_vector)",
+      "color": "#E11D48",
+      "label": "Tu Elección",
+      "style": "dashed",
+      "weight": 3
+    }
+  ]
+}
+
+```
+---
+
+Las variables numéricas de `sliders` se inyectan en el scope de evaluación de `math.compile(expr).evaluate(scope)` en cada frame cuando el usuario arrastra el control, manteniendo el tiempo de respuesta por debajo de los 16 milisegundos.
