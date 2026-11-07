@@ -24,6 +24,7 @@
     "react-katex": "^3.1.0",
     "server-only": "^0.0.1",
     "three": "^0.187.0",
+    "unpdf": "^1.9.1",
     "zustand": "^5.1.0"
   },
   "devDependencies": {
