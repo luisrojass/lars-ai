@@ -101,8 +101,8 @@ CASO 1: Si archetype === "CALCULUS_DERIVATIVE_TANGENT_2D":
   },
   "interactive_point": { "symbol": "x_0", "default_value": 2 },
   "sliders": [
-    { "id": "x_0", "symbol": "x_0", "label": "Punto de Tangencia (x₀)", "min": -2.0, "max": 4.0, "step": 0.25, "default": 2.0 },
-    { "id": "h", "symbol": "h", "label": "Paso Secante (h)", "min": 0.05, "max": 2.0, "step": 0.05, "default": 0.5 }
+    { "id": "x_0", "symbol": "x_0", "label": "Punto de Tangencia (x₀)", "min": -2.0, "max": 4.0, "step": 0.01, "default": 2.0 },
+    { "id": "h", "symbol": "h", "label": "Paso Secante (h)", "min": 0.05, "max": 2.0, "step": 0.01, "default": 0.5 }
   ],
   "render_layers": [
     { "type": "plot", "fn": "target", "color": "#334155", "style": "solid", "weight": 3 },
@@ -121,8 +121,8 @@ CASO 2: Si archetype === "CALCULUS_INTEGRAL_AREA_2D":
   },
   "interval": { "lower_bound": 0 },
   "sliders": [
-    { "id": "b", "symbol": "b", "label": "Límite Superior (b)", "min": 1.0, "max": 6.0, "step": 0.5, "default": 4.0 },
-    { "id": "n", "symbol": "n", "label": "Particiones Riemann (n)", "min": 2, "max": 30, "step": 1, "default": 8 }
+    { "id": "b", "symbol": "b", "label": "Límite Superior (b)", "min": 1.0, "max": 6.0, "step": 0.01, "default": 4.0 },
+    { "id": "n", "symbol": "n", "label": "Particiones Riemann (n)", "min": 2, "max": 40, "step": 1, "default": 8 }
   ],
   "render_layers": [
     { "type": "plot", "fn": "target", "color": "#334155", "style": "solid", "weight": 3 },
@@ -143,8 +143,8 @@ CASO 3: Si archetype === "LINEAR_TRANSFORMATION_GRID_2D":
   },
   "input_vector": [1, 2],
   "sliders": [
-    { "id": "t", "symbol": "t", "label": "Animar Transformación", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0 },
-    { "id": "k", "symbol": "k", "label": "Escalar Vector (k)", "min": 0.5, "max": 2.5, "step": 0.25, "default": 1.0 }
+    { "id": "t", "symbol": "t", "label": "Animar Transformación", "min": 0.0, "max": 1.0, "step": 0.005, "default": 1.0 },
+    { "id": "k", "symbol": "k", "label": "Escalar Vector (k)", "min": 0.5, "max": 2.5, "step": 0.01, "default": 1.0 }
   ],
   "render_layers": [
     { "type": "deformed_grid", "matrix_source": "correct_transform", "interpolation_var": "t", "line_color": "#CBD5E1", "weight": 1.5 },
@@ -153,8 +153,21 @@ CASO 3: Si archetype === "LINEAR_TRANSFORMATION_GRID_2D":
   ]
 }`;
 
+function smoothSliders(sliders: ArchetypeGraphPayload["sliders"]): ArchetypeGraphPayload["sliders"] {
+  return sliders.map((s) => {
+    if (s.id === "n" || s.symbol === "n") {
+      return { ...s, step: 1, max: Math.max(s.max || 30, 40) };
+    }
+    if (s.id === "t" || s.symbol === "t") {
+      return { ...s, step: 0.005 };
+    }
+    return { ...s, step: 0.01 };
+  });
+}
+
 /**
- * Garantiza que el JSON #2 cumpla al 100% con problem_types.txt sin campos faltantes.
+ * Garantiza que el JSON #2 cumpla al 100% con problem_types.txt sin campos faltantes
+ * y con pasos (step) ultrafinos para animaciones continuas a 60 FPS.
  */
 export function normalizeArchetypeGraph(
   raw: Partial<ArchetypeGraphPayload> | null | undefined,
@@ -185,7 +198,7 @@ export function normalizeArchetypeGraph(
         symbol: "x_0",
         default_value: x0Default,
       },
-      sliders:
+      sliders: smoothSliders(
         Array.isArray(r.sliders) && r.sliders.length > 0
           ? r.sliders
           : [
@@ -195,7 +208,7 @@ export function normalizeArchetypeGraph(
                 label: "Punto de Tangencia (x₀)",
                 min: -2.0,
                 max: 4.0,
-                step: 0.25,
+                step: 0.01,
                 default: x0Default,
               },
               {
@@ -204,10 +217,11 @@ export function normalizeArchetypeGraph(
                 label: "Paso Secante (h)",
                 min: 0.05,
                 max: 2.0,
-                step: 0.05,
+                step: 0.01,
                 default: 0.5,
               },
-            ],
+            ]
+      ),
       render_layers:
         Array.isArray(r.render_layers) && r.render_layers.length >= 2
           ? r.render_layers
@@ -256,7 +270,7 @@ export function normalizeArchetypeGraph(
       interval: {
         lower_bound: lower,
       },
-      sliders:
+      sliders: smoothSliders(
         Array.isArray(r.sliders) && r.sliders.length > 0
           ? r.sliders
           : [
@@ -266,7 +280,7 @@ export function normalizeArchetypeGraph(
                 label: "Límite Superior (b)",
                 min: 1.0,
                 max: 6.0,
-                step: 0.5,
+                step: 0.01,
                 default: 4.5,
               },
               {
@@ -274,11 +288,12 @@ export function normalizeArchetypeGraph(
                 symbol: "n",
                 label: "Particiones Riemann (n)",
                 min: 2,
-                max: 30,
+                max: 40,
                 step: 1,
                 default: 8,
               },
-            ],
+            ]
+      ),
       render_layers:
         Array.isArray(r.render_layers) && r.render_layers.length >= 2
           ? r.render_layers
@@ -325,7 +340,7 @@ export function normalizeArchetypeGraph(
     },
     input_vector:
       Array.isArray(r.input_vector) && r.input_vector.length === 2 ? r.input_vector : [1, 2],
-    sliders:
+    sliders: smoothSliders(
       Array.isArray(r.sliders) && r.sliders.length > 0
         ? r.sliders
         : [
@@ -335,7 +350,7 @@ export function normalizeArchetypeGraph(
               label: "Animar Transformación",
               min: 0.0,
               max: 1.0,
-              step: 0.05,
+              step: 0.005,
               default: 1.0,
             },
             {
@@ -344,10 +359,11 @@ export function normalizeArchetypeGraph(
               label: "Escalar Vector (k)",
               min: 0.5,
               max: 2.5,
-              step: 0.25,
+              step: 0.01,
               default: 1.0,
             },
-          ],
+          ]
+    ),
     render_layers:
       Array.isArray(r.render_layers) && r.render_layers.length >= 2
         ? r.render_layers

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Mafs, Coordinates, Plot, Vector, Point, Polygon, Line, Text } from 'mafs';
 import type {
   ArchetypeGraphPayload,
@@ -51,6 +51,32 @@ export const ArchetypeCanvas2D: React.FC<ArchetypeCanvas2DProps> = ({
   showErrorLayer = true,
   showGrid = true,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
+    width: 800,
+    height: 600,
+  });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setDimensions({
+          width: Math.floor(rect.width),
+          height: Math.floor(rect.height),
+        });
+      }
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const xBounds: [number, number] = graph.view?.x_bounds || [-5, 5];
   const yBounds: [number, number] = graph.view?.y_bounds || [-5, 5];
   const gridStep = graph.view?.grid_step || 1;
@@ -77,7 +103,8 @@ export const ArchetypeCanvas2D: React.FC<ArchetypeCanvas2DProps> = ({
 
   return (
     <div
-      className="w-full h-full relative select-none flex items-center justify-center overflow-hidden"
+      ref={containerRef}
+      className="w-full h-full relative select-none overflow-hidden"
       style={{
         backgroundColor: '#F8FAFC',
         // Variables CSS de Mafs forzadas a Modo Claro Proyector (#F8FAFC)
@@ -91,11 +118,14 @@ export const ArchetypeCanvas2D: React.FC<ArchetypeCanvas2DProps> = ({
       }}
     >
       <Mafs
+        width={dimensions.width}
+        height={dimensions.height}
         viewBox={{
           x: xBounds,
           y: yBounds,
+          padding: 0.4,
         }}
-        preserveAspectRatio="contain"
+        preserveAspectRatio={false}
         pan={true}
         zoom={{ min: 0.4, max: 3.5 }}
       >

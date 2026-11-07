@@ -15,8 +15,8 @@ export default function ClasePage({ params }: PageProps) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100vh-3.5rem)] w-full flex items-center justify-center bg-slate-950 text-slate-100">
-          <Loader2 className="h-8 w-8 text-sky-400 animate-spin" />
+        <div className="min-h-[calc(100vh-3.5rem)] w-full flex items-center justify-center bg-[#F8FAFC] text-slate-900">
+          <Loader2 className="h-8 w-8 text-sky-600 animate-spin" />
         </div>
       }
     >

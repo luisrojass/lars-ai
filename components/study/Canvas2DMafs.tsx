@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { Mafs, Coordinates, Plot, Vector, Point, Theme } from 'mafs';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { Mafs, Coordinates, Plot, Vector, Point } from 'mafs';
 import { EsquemaGeometrico } from '@/types';
 import { createEvaluator } from '@/lib/mathEvaluator';
 
@@ -11,21 +11,37 @@ interface Canvas2DMafsProps {
   mostrarLineasGuia?: boolean;
 }
 
-/**
- * Lienzo 2D 3B1B utilizando Mafs estrictamente configurado en Modo Claro Proyector.
- * Especificaciones de color:
- * - Fondo: #F8FAFC
- * - Ejes principales: #334155
- * - Cuadrícula secundaria: #CBD5E1
- * - Curva/Vector Correcto: Azul Cian (#0284C7) o Teal (#0D9488) con trazo 3.5px
- * - Curva/Vector de Error: Rojo Carmesí (#E11D48) con línea punteada diagnóstica
- */
 export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
   esquema,
   valoresSliders,
   mostrarLineasGuia = true
 }) => {
-  // Evaluadores compilados en memoria con Math.js para 60 FPS garantizados
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
+    width: 800,
+    height: 600,
+  });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setDimensions({
+          width: Math.floor(rect.width),
+          height: Math.floor(rect.height),
+        });
+      }
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const evaluadoresFunciones = useMemo(() => {
     const mapa = new Map<string, (x: number) => number>();
     esquema.elementos.forEach((el) => {
@@ -38,10 +54,10 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
 
   return (
     <div
-      className="w-full h-full relative select-none flex items-center justify-center overflow-hidden"
+      ref={containerRef}
+      className="w-full h-full relative select-none overflow-hidden"
       style={{
         backgroundColor: '#F8FAFC',
-        // Inyección de variables CSS de Mafs para forzar Modo Claro Proyector
         // @ts-expect-error Mafs custom CSS variables
         '--mafs-bg': '#F8FAFC',
         '--mafs-fg': '#334155',
@@ -52,15 +68,17 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
       }}
     >
       <Mafs
+        width={dimensions.width}
+        height={dimensions.height}
         viewBox={{
           x: esquema.dominioX,
-          y: esquema.dominioY
+          y: esquema.dominioY,
+          padding: 0.4,
         }}
-        preserveAspectRatio="contain"
+        preserveAspectRatio={false}
         pan={true}
         zoom={{ min: 0.3, max: 4 }}
       >
-        {/* Cuadrícula de Alto Contraste para Proyectores */}
         {mostrarLineasGuia && (
           <Coordinates.Cartesian
             subdivisions={2}
@@ -69,7 +87,6 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
           />
         )}
 
-        {/* Renderizado de Elementos Geométricos */}
         {esquema.elementos.map((el) => {
           if (el.tipo === 'funcion' && el.expresion) {
             const fn = evaluadoresFunciones.get(el.id) || (() => 0);
@@ -79,7 +96,7 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
               <Plot.OfX
                 key={el.id}
                 y={fn}
-                color={el.color} // #0284C7, #0D9488, o #E11D48
+                color={el.color}
                 weight={el.grosor || (esDiagnostica ? 2.5 : 3.5)}
                 style={esDiagnostica ? 'dashed' : 'solid'}
               />
@@ -87,7 +104,6 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
           }
 
           if (el.tipo === 'vector' && el.punto) {
-            // Calcular posición del vector afectado por los sliders (ej. lambda o coordenadas)
             const factorLambda = valoresSliders['lambda'] ?? 1;
             const vxBase = valoresSliders['vx'] ?? el.punto[0];
             const vyBase = valoresSliders['vy'] ?? el.punto[1];
@@ -123,7 +139,6 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
             let px = el.punto[0];
             let py = el.punto[1];
 
-            // Ajuste reactivo para el punto de inflexión con sliders si aplica
             if (el.id === 'pt-1' && valoresSliders['a']) {
               const a = valoresSliders['a'];
               const h = valoresSliders['h'] || 2;

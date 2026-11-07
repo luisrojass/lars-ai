@@ -3,7 +3,7 @@
 import React from 'react';
 import { useStudyStore } from '@/store/useStudyStore';
 import { MathFormula } from '@/components/math/MathFormula';
-import { Sliders, RotateCcw, Box, Compass, Eye } from 'lucide-react';
+import { Sliders, RotateCcw, Box, Compass } from 'lucide-react';
 
 export const DockSliders: React.FC = () => {
   const {
@@ -21,97 +21,95 @@ export const DockSliders: React.FC = () => {
   const sliders = esquema.sliders || [];
 
   return (
-    <div className="w-full bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 sm:px-6 shadow-2xl">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Cabecera del Dock y Controles Rápidos */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-          <div className="flex items-center gap-2">
-            <div className="p-1 rounded bg-sky-500/20 text-sky-400">
-              <Sliders className="h-3.5 w-3.5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] font-semibold text-slate-200 tracking-wide">
-                Dock Interactivo Math.js
-              </span>
-              <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                60 FPS en Memoria Local
-              </span>
-            </div>
+    <div className="w-full bg-white/98 backdrop-blur-md border-t-2 border-slate-300 px-4 py-3.5 sm:px-6 sm:py-4 shadow-xl space-y-3">
+      {/* Cabecera del Dock y Controles Rápidos */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-600">
+            <Sliders className="h-4 w-4" />
           </div>
-
-          {/* Botones de acción del dock */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={toggleMotorGrafico}
-              title="Alternar entre motor 2D (Mafs) y 3D (Three.js)"
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-medium transition-colors border border-slate-700"
-            >
-              <Box className="h-3 w-3 text-sky-400" />
-              <span>{motorGrafico === 'mafs-2d' ? '3D Three.js' : '2D Mafs'}</span>
-            </button>
-
-            <button
-              onClick={toggleLineasGuia}
-              title="Mostrar u ocultar cuadrícula"
-              className={`p-1.5 rounded transition-colors border ${
-                mostrarLineasGuia
-                  ? 'bg-sky-500/20 border-sky-500/40 text-sky-300'
-                  : 'bg-slate-800 border-slate-700 text-slate-400'
-              }`}
-            >
-              <Compass className="h-3.5 w-3.5" />
-            </button>
-
-            <button
-              onClick={reiniciarSliders}
-              title="Restablecer valores iniciales"
-              className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors border border-slate-700"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          <span className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight">
+            Dock Interactivo Math.js
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+            60 FPS en Memoria Local
+          </span>
         </div>
 
-        {/* Sliders Reactivos */}
-        <div className="flex-1 w-full flex flex-wrap items-center justify-end gap-3 sm:gap-6">
-          {sliders.map((s) => {
-            const valorActual = valoresSliders[s.id] ?? s.valorDefecto;
+        {/* Botones de acción del dock */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={toggleMotorGrafico}
+            title="Alternar entre motor 2D (Mafs) y 3D (Three.js)"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors border border-slate-300"
+          >
+            <Box className="h-3.5 w-3.5 text-sky-600" />
+            <span>{motorGrafico === 'mafs-2d' ? '3D Three.js' : '2D Mafs'}</span>
+          </button>
 
-            return (
-              <div
-                key={s.id}
-                className="flex items-center gap-2.5 bg-slate-950/70 px-3 py-1.5 rounded-lg border border-slate-800 min-w-[210px] sm:min-w-[230px]"
-              >
-                {/* Símbolo Matemático con KaTeX */}
-                <div className="w-7 text-xs font-mono font-bold text-sky-400 text-center">
-                  <MathFormula math={`$${s.simbolo}$`} />
-                </div>
+          <button
+            onClick={toggleLineasGuia}
+            title="Mostrar u ocultar cuadrícula"
+            className={`p-1.5 rounded-lg transition-colors border ${
+              mostrarLineasGuia
+                ? 'bg-sky-50 border-sky-300 text-sky-700'
+                : 'bg-slate-100 border-slate-300 text-slate-600'
+            }`}
+          >
+            <Compass className="h-4 w-4" />
+          </button>
 
-                {/* Slider Input */}
-                <div className="flex-1 flex flex-col">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
-                    <span className="truncate max-w-[100px]">{s.nombre}</span>
-                    <span className="font-mono text-slate-200 font-semibold">
-                      {valorActual.toFixed(1)} {s.unidad || ''}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={s.min}
-                    max={s.max}
-                    step={s.step}
-                    value={valorActual}
-                    onChange={(e) =>
-                      actualizarSlider(s.id, parseFloat(e.target.value))
-                    }
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400 focus:outline-none"
-                  />
-                </div>
+          <button
+            onClick={reiniciarSliders}
+            title="Restablecer valores iniciales"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold transition-colors border border-slate-300"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Reiniciar</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Sliders Reactivos Grandes ocupando todo el ancho */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+        {sliders.map((s) => {
+          const valorActual = valoresSliders[s.id] ?? s.valorDefecto;
+          const fineStep = Math.min(s.step || 0.01, 0.01);
+
+          return (
+            <div
+              key={s.id}
+              className="w-full flex items-center gap-3.5 bg-slate-50 px-4 py-3 rounded-2xl border-2 border-slate-300 hover:border-sky-400 transition-colors shadow-2xs"
+            >
+              <div className="w-11 h-11 rounded-xl bg-sky-50 border border-sky-300 flex items-center justify-center text-sm sm:text-base font-mono font-extrabold text-sky-700 shrink-0 shadow-2xs">
+                <MathFormula math={`$${s.simbolo}$`} />
               </div>
-            );
-          })}
-        </div>
+
+              <div className="flex-1 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800 truncate">
+                    {s.nombre}
+                  </span>
+                  <span className="font-mono text-xs sm:text-sm text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-lg font-extrabold">
+                    {valorActual.toFixed(2)} {s.unidad || ''}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={s.min}
+                  max={s.max}
+                  step={fineStep}
+                  value={valorActual}
+                  onChange={(e) =>
+                    actualizarSlider(s.id, parseFloat(e.target.value))
+                  }
+                  className="w-full projector-slider focus:outline-none"
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

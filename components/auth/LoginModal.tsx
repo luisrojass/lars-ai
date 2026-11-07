@@ -32,31 +32,33 @@ export const LoginModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4"
       onMouseDown={(e) => e.target === e.currentTarget && closeModal()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="login-title"
     >
-      <div className="relative w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl space-y-5">
+      <div className="relative w-full max-w-sm rounded-2xl bg-white border border-slate-300 p-6 shadow-2xl space-y-5">
         <button
           onClick={closeModal}
           aria-label="Cerrar"
-          className="absolute right-3 top-3 p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800"
+          className="absolute right-3 top-3 p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-100"
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="space-y-1">
-          <h2 id="login-title" className="text-lg font-bold text-slate-100">
-            Iniciar sesión
+          <h2 id="login-title" className="text-lg font-bold text-slate-900">
+            Iniciar sesión en Lars AI
           </h2>
-          <p className="text-xs text-slate-400">Ingresa con tu correo y contraseña para subir material.</p>
+          <p className="text-xs text-slate-600">
+            Ingresa con tu correo y contraseña para subir material.
+          </p>
         </div>
 
         <form onSubmit={submit} className="space-y-3">
           <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="email"
               required
@@ -65,11 +67,11 @@ export const LoginModal: React.FC = () => {
               placeholder="correo@ejemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 focus:bg-white"
             />
           </div>
           <div className="relative">
-            <KeyRound className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <KeyRound className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="password"
               required
@@ -77,16 +79,20 @@ export const LoginModal: React.FC = () => {
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 focus:bg-white"
             />
           </div>
 
-          {error && <p className="text-xs text-rose-400" role="alert">{error}</p>}
+          {error && (
+            <p className="text-xs font-medium text-rose-600" role="alert">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-400 disabled:opacity-60 text-slate-950 font-semibold text-sm py-2 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-sm py-2 rounded-lg transition-colors shadow-sm"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
             <span>{loading ? 'Entrando…' : 'Entrar'}</span>

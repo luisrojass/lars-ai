@@ -33,7 +33,7 @@ const ArchetypeCanvas2D = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full flex items-center justify-center bg-[#F8FAFC] text-slate-500 font-mono text-xs">
+      <div className="w-full h-full flex items-center justify-center bg-[#F8FAFC] text-slate-600 font-mono text-xs">
         Iniciando Motor Mafs 2D...
       </div>
     ),
@@ -200,7 +200,7 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
           body: JSON.stringify({
             generacion_id: itemActual.generacion_id,
             opcion_seleccionada: opcionId,
-            alumno_nombre: user?.name || user?.email || 'Estudiante ENEISOFT',
+            alumno_nombre: user?.name || user?.email || 'Estudiante Lars AI',
           }),
         }).catch((e) => console.warn('Error al guardar respuesta en db:', e));
       } catch {}
@@ -281,17 +281,17 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
 
   if (cargando) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] w-full flex flex-col items-center justify-center p-6 bg-slate-950 text-slate-100">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
-          <Loader2 className="h-10 w-10 text-sky-400 animate-spin mx-auto" />
+      <div className="min-h-[calc(100vh-3.5rem)] w-full flex flex-col items-center justify-center p-6 bg-[#F8FAFC] text-slate-900">
+        <div className="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-4 shadow-xl">
+          <Loader2 className="h-10 w-10 text-sky-600 animate-spin mx-auto" />
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-slate-100">Analizando documento con Gemini...</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-lg font-bold text-slate-900">Analizando documento en Lars AI...</h2>
+            <p className="text-xs text-slate-600">
               Clasificando el problema en uno de los 3 arquetipos matemáticos y generando el 1er JSON...
             </p>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-400 to-teal-400 h-full w-2/3 animate-pulse rounded-full" />
+          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-600 to-teal-500 h-full w-2/3 animate-pulse rounded-full" />
           </div>
         </div>
       </div>
@@ -300,21 +300,21 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
 
   if (error && !itemActual) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] w-full flex items-center justify-center p-6 bg-slate-950 text-slate-100">
-        <div className="max-w-md w-full bg-slate-900 border border-rose-500/30 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
-          <XCircle className="h-10 w-10 text-rose-400 mx-auto" />
-          <h2 className="text-lg font-bold text-slate-100">No se pudo cargar la evaluación</h2>
-          <p className="text-xs text-slate-400">{error}</p>
+      <div className="min-h-[calc(100vh-3.5rem)] w-full flex items-center justify-center p-6 bg-[#F8FAFC] text-slate-900">
+        <div className="max-w-md w-full bg-white border border-rose-300 rounded-2xl p-8 text-center space-y-4 shadow-xl">
+          <XCircle className="h-10 w-10 text-rose-600 mx-auto" />
+          <h2 className="text-lg font-bold text-slate-900">No se pudo cargar la evaluación</h2>
+          <p className="text-xs text-slate-600">{error}</p>
           <div className="pt-2 flex justify-center gap-3">
             <Link
               href="/crear-clase"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-semibold text-slate-800"
             >
               <ArrowLeft className="h-4 w-4" /> Volver a Crear Clase
             </Link>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-xs font-bold text-slate-950"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-xs font-bold text-white shadow-sm"
             >
               <RotateCcw className="h-4 w-4" /> Reintentar
             </button>
@@ -331,31 +331,31 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
   const esCorrectaSeleccionada = respuestaActual?.opcionId === question.correct_option_id;
 
   return (
-    <div className="h-[calc(100vh-3.5rem)] w-full bg-slate-950 text-slate-100 flex flex-col lg:flex-row overflow-hidden">
+    <div className="h-[calc(100vh-3.5rem)] w-full bg-[#F8FAFC] text-slate-900 flex flex-col lg:flex-row overflow-hidden">
       {/* ============================================================== */}
-      {/* PANEL IZQUIERDO: Thea Engine (Pregunta, Opciones y Feedback)   */}
+      {/* PANEL IZQUIERDO: Lars AI (Pregunta, Opciones y Feedback)       */}
       {/* ============================================================== */}
-      <div className="w-full lg:w-[44%] xl:w-[42%] h-full flex flex-col border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 overflow-y-auto">
+      <div className="w-full lg:w-[44%] xl:w-[42%] h-full flex flex-col border-b lg:border-b-0 lg:border-r border-slate-300 bg-white overflow-y-auto">
         {/* Cabecera del Panel */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/60 sticky top-0 z-10 backdrop-blur-md flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/90 sticky top-0 z-10 backdrop-blur-md flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link
               href="/crear-clase"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors"
               title="Volver a Crear Clase"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-sky-400 font-mono">
+                <span className="text-xs font-bold text-sky-700 font-mono">
                   Pregunta {indiceActual + 1}
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-300 font-mono">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 border border-sky-300 text-sky-800 font-mono font-semibold">
                   {question.archetype}
                 </span>
               </div>
-              <h3 className="text-xs text-slate-400 truncate max-w-[260px]">
+              <h3 className="text-xs text-slate-600 font-medium truncate max-w-[260px]">
                 {question.topic} • {question.difficulty}
               </h3>
             </div>
@@ -365,12 +365,12 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
             {indiceActual > 0 && (
               <button
                 onClick={handlePreguntaAnterior}
-                className="px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors"
               >
                 Anterior
               </button>
             )}
-            <span className="text-xs font-mono text-slate-500 px-2">
+            <span className="text-xs font-mono font-bold text-slate-500 px-2">
               #{indiceActual + 1}
             </span>
           </div>
@@ -379,22 +379,22 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
         {/* Contenido Principal de la Pregunta */}
         <div className="p-5 sm:p-6 space-y-6 flex-1">
           {/* Enunciado Matemático */}
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 shadow-inner">
-            <div className="flex items-center justify-between text-slate-400 text-xs font-mono mb-1">
+          <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-slate-300 space-y-2 shadow-2xs">
+            <div className="flex items-center justify-between text-slate-600 text-xs font-mono font-semibold mb-1">
               <span className="flex items-center gap-1.5">
-                <Brain className="h-3.5 w-3.5 text-sky-400" />
+                <Brain className="h-3.5 w-3.5 text-sky-600" />
                 <span>Planteamiento ({ARCHETYPE_LABELS[question.archetype]}):</span>
               </span>
             </div>
-            <div className="text-base sm:text-lg text-slate-100 font-medium leading-relaxed">
+            <div className="text-base sm:text-lg text-slate-900 font-medium leading-relaxed">
               <MathFormula math={question.question_latex} />
             </div>
           </div>
 
           {/* Selector de 4 Opciones */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="font-semibold text-slate-300">
+            <div className="flex items-center justify-between text-xs text-slate-600">
+              <span className="font-bold text-slate-800">
                 Selecciona una alternativa (1-4):
               </span>
               <span className="text-[11px] font-mono text-slate-500">
@@ -407,27 +407,30 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
                 const seleccionada = respuestaActual?.opcionId === opt.id;
                 const esLaCorrecta = opt.id === question.correct_option_id;
 
-                let estilo = 'bg-slate-900/60 hover:bg-slate-850 border-slate-800 text-slate-200';
-                let estiloBadge = 'bg-slate-950 text-slate-400 border-slate-800';
+                let estilo =
+                  'bg-white hover:bg-sky-50/50 border-slate-300 hover:border-sky-400 text-slate-900 shadow-2xs';
+                let estiloBadge = 'bg-slate-100 text-slate-700 border-slate-300 font-semibold';
 
                 if (yaRespondio) {
                   if (seleccionada) {
                     if (esLaCorrecta) {
-                      estilo = 'bg-teal-500/15 border-teal-500 text-teal-100 ring-1 ring-teal-500/30';
-                      estiloBadge = 'bg-teal-500 text-slate-950 font-bold';
+                      estilo =
+                        'bg-teal-50 border-teal-600 text-teal-950 ring-2 ring-teal-500/30 shadow-xs';
+                      estiloBadge = 'bg-teal-600 text-white border-teal-600 font-bold';
                     } else {
-                      estilo = 'bg-rose-500/15 border-rose-500 text-rose-100 ring-1 ring-rose-500/30';
-                      estiloBadge = 'bg-rose-500 text-white font-bold';
+                      estilo =
+                        'bg-rose-50 border-rose-600 text-rose-950 ring-2 ring-rose-500/30 shadow-xs';
+                      estiloBadge = 'bg-rose-600 text-white border-rose-600 font-bold';
                     }
                   } else if (esLaCorrecta) {
-                    estilo = 'bg-teal-500/10 border-teal-500/40 text-teal-200';
-                    estiloBadge = 'bg-teal-500/30 text-teal-300 border-teal-500/40';
+                    estilo = 'bg-teal-50/70 border-teal-500 text-teal-900';
+                    estiloBadge = 'bg-teal-100 text-teal-800 border-teal-400 font-bold';
                   } else {
-                    estilo = 'opacity-50 bg-slate-900/30 border-slate-850 text-slate-500';
+                    estilo = 'opacity-60 bg-slate-50 border-slate-200 text-slate-500';
                   }
                 } else if (seleccionada) {
-                  estilo = 'bg-sky-500/15 border-sky-400 text-sky-200';
-                  estiloBadge = 'bg-sky-500 text-slate-950 font-bold';
+                  estilo = 'bg-sky-50 border-sky-600 text-sky-950';
+                  estiloBadge = 'bg-sky-600 text-white border-sky-600 font-bold';
                 }
 
                 return (
@@ -443,7 +446,7 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
                       >
                         {opt.id}
                       </span>
-                      <div className="text-sm sm:text-base font-normal">
+                      <div className="text-sm sm:text-base font-medium">
                         <MathFormula math={opt.text_latex} />
                       </div>
                     </div>
@@ -451,9 +454,9 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
                     {yaRespondio && (
                       <div className="shrink-0 ml-2">
                         {esLaCorrecta ? (
-                          <CheckCircle2 className="h-5 w-5 text-teal-400" />
+                          <CheckCircle2 className="h-5 w-5 text-teal-600" />
                         ) : seleccionada ? (
-                          <XCircle className="h-5 w-5 text-rose-400" />
+                          <XCircle className="h-5 w-5 text-rose-600" />
                         ) : null}
                       </div>
                     )}
@@ -463,29 +466,29 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
             </div>
           </div>
 
-          {/* Caja de Retroalimentación Socrática Inmediata (Thea Engine) */}
+          {/* Caja de Retroalimentación Socrática Inmediata (Lars AI) */}
           {yaRespondio && (
             <div
-              className={`p-4 sm:p-5 rounded-2xl border space-y-2 animate-fade-in ${
+              className={`p-4 sm:p-5 rounded-2xl border space-y-2 animate-fade-in-up ${
                 esCorrectaSeleccionada
-                  ? 'bg-teal-950/40 border-teal-500/40 text-teal-100'
-                  : 'bg-rose-950/30 border-rose-500/30 text-rose-100'
+                  ? 'bg-teal-50/90 border-teal-400 text-teal-950'
+                  : 'bg-rose-50/90 border-rose-400 text-rose-950'
               }`}
             >
               <div className="flex items-center gap-2">
                 {esCorrectaSeleccionada ? (
-                  <CheckCircle2 className="h-4 w-4 text-teal-400" />
+                  <CheckCircle2 className="h-4 w-4 text-teal-600" />
                 ) : (
-                  <HelpCircle className="h-4 w-4 text-rose-400" />
+                  <HelpCircle className="h-4 w-4 text-rose-600" />
                 )}
                 <span className="text-xs font-bold uppercase tracking-wider font-mono">
                   {esCorrectaSeleccionada
-                    ? '¡Respuesta Correcta! • Razonamiento Socrático'
-                    : 'Error Conceptual Detectado • Diagnóstico Thea'}
+                    ? '¡Respuesta Correcta!'
+                    : 'Error Detectado'}
                 </span>
               </div>
 
-              <div className="text-xs sm:text-sm text-slate-200 leading-relaxed pt-1">
+              <div className="text-xs sm:text-sm text-slate-800 leading-relaxed pt-1">
                 <MathFormula math={explicacion} />
               </div>
             </div>
@@ -493,16 +496,16 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
         </div>
 
         {/* Barra de Acciones Inferior */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/70 flex items-center justify-between">
-          <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-sky-400" />
+        <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+          <span className="text-xs text-slate-600 font-mono font-medium flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-sky-600" />
             <span className="truncate max-w-[200px]">{question.archetype}</span>
           </span>
 
           <button
             onClick={handleSiguientePregunta}
             disabled={generandoSiguiente}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-teal-400 text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-sky-500/20 hover:scale-102 transition-transform disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-600/20 hover:scale-102 transition-transform disabled:opacity-50"
           >
             {generandoSiguiente ? (
               <>
@@ -524,30 +527,30 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
       {/* ============================================================== */}
       <div className="flex-1 h-full bg-[#F8FAFC] flex flex-col relative select-none overflow-hidden">
         {/* Cabecera del Lienzo Proyector */}
-        <div className="h-12 border-b border-slate-200 bg-white/90 px-4 flex items-center justify-between backdrop-blur-sm z-10 shrink-0">
+        <div className="h-12 border-b border-slate-200 bg-white/95 px-4 flex items-center justify-between backdrop-blur-sm z-10 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="h-2.5 w-2.5 rounded-full bg-sky-500" />
-            <span className="text-xs font-bold text-slate-800 font-mono tracking-tight">
-              LIENZO PROYECTOR 3B1B (Mafs.dev)
+            <div className="h-2.5 w-2.5 rounded-full bg-sky-600" />
+            <span className="text-xs font-bold text-slate-900 font-mono tracking-tight">
+              LARS AI • LIENZO PROYECTOR 3B1B
             </span>
-            <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-mono">
+            <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700 font-mono font-semibold">
               {question.archetype}
             </span>
           </div>
 
           {/* Leyenda de Capas */}
-          <div className="flex items-center gap-3 text-[11px] font-mono text-slate-600">
+          <div className="flex items-center gap-3 text-[11px] font-mono text-slate-700 font-medium">
             <span className="hidden md:flex items-center gap-1.5">
               <span className="inline-block w-3.5 h-[3.5px] rounded-full bg-[#0284C7]" />
-              <span>Real (#0284C7)</span>
+              <span>Real</span>
             </span>
             <span className="hidden md:flex items-center gap-1.5">
               <span className="inline-block w-3.5 h-[2.5px] border-b-2 border-dashed border-[#E11D48]" />
-              <span>Hipótesis Error (#E11D48)</span>
+              <span>Hipótesis Error</span>
             </span>
-            <span className="flex items-center gap-1 text-slate-500">
+            <span className="flex items-center gap-1 text-slate-600">
               <Layers className="h-3.5 w-3.5 text-sky-600" />
-              <span>{graficoActual ? 'JSON #2 Listo' : 'Cargando JSON #2...'}</span>
+              <span>{graficoActual ? 'Gráfico listo' : 'Preparando gráfico...'}</span>
             </span>
           </div>
         </div>
@@ -565,40 +568,40 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
             />
 
             <div className="max-w-md p-6 rounded-2xl bg-white border border-slate-200 shadow-xl space-y-4 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 mx-auto shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 mx-auto shadow-xs">
                 <Sliders className="h-6 w-6" />
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-800">
-                  Simulación Lista para Ejecutarse
+                <h3 className="text-base font-bold text-slate-900">
+                  Simulación Lista.
                 </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Selecciona una de las 4 alternativas a la izquierda para desplegar de inmediato la simulación interactiva en <strong>Mafs.dev</strong>.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Selecciona una de las 4 alternativas para mostrar la simulación interactiva.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-1.5 text-[11px] font-mono text-slate-600">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-1.5 text-[11px] font-mono text-slate-700">
                 <div>
-                  • Arquetipo (JSON #1):{' '}
+                  • Tipo de Gráfico:{' '}
                   <strong className="text-sky-700">{question.archetype}</strong>
                 </div>
                 <div>
-                  • Tema: <strong className="text-slate-800">{ARCHETYPE_LABELS[question.archetype]}</strong>
+                  • Tema: <strong className="text-slate-900">{ARCHETYPE_LABELS[question.archetype]}</strong>
                 </div>
                 <div className="flex items-center gap-1.5 pt-1 border-t border-slate-200">
                   {graficoActual ? (
                     <>
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="h-2 w-2 rounded-full bg-emerald-600" />
                       <span className="text-emerald-700 font-semibold">
-                        JSON #2 recibido en memoria (Zero-Wait activo)
+                        Gráfico listo (Zero-Wait)
                       </span>
                     </>
                   ) : (
                     <>
                       <Loader2 className="h-3.5 w-3.5 text-sky-600 animate-spin" />
                       <span className="text-sky-700">
-                        Recibiendo JSON #2 de simulación en segundo plano...
+                        Preparando la simulación en segundo plano...
                       </span>
                     </>
                   )}
@@ -610,26 +613,26 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
           /* Caso borde si el usuario respondió en <1s y el 2do JSON aún viene en camino */
           <div className="flex-1 w-full h-full flex flex-col items-center justify-center bg-[#F8FAFC] p-6 text-center space-y-3">
             <Loader2 className="h-8 w-8 text-sky-600 animate-spin" />
-            <p className="text-xs font-mono text-slate-600">
-              Ejecutando 2do JSON en el motor gráfico Mafs.dev...
+            <p className="text-xs font-mono text-slate-700">
+              Ejecutando el motor gráfico...
             </p>
           </div>
         ) : graficoActual ? (
-          /* Motor Gráfico Mafs 2D en ejecución + Dock de Sliders Math.js */
+          /* Motor Gráfico Mafs 2D en ejecución + Dock de Sliders Math.js en Modo Claro */
           <>
             {/* Etiqueta flotante superior izquierda con resumen de funciones/matrices */}
             <div className="absolute top-14 left-4 z-10 pointer-events-none max-w-xs sm:max-w-sm">
-              <div className="bg-white/92 backdrop-blur-xs px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm space-y-0.5">
-                <div className="text-[11px] font-bold text-slate-800 font-mono">
+              <div className="bg-white/95 backdrop-blur-xs px-3.5 py-2 rounded-xl border border-slate-300 shadow-sm space-y-0.5">
+                <div className="text-[11px] font-bold text-slate-900 font-mono">
                   {ARCHETYPE_LABELS[graficoActual.archetype]}
                 </div>
                 {'functions' in graficoActual && graficoActual.functions?.target && (
-                  <div className="text-[11px] font-mono text-slate-600">
-                    f(x) = <span className="text-slate-900 font-semibold">{graficoActual.functions.target}</span>
+                  <div className="text-[11px] font-mono text-slate-700">
+                    f(x) = <span className="text-slate-900 font-bold">{graficoActual.functions.target}</span>
                   </div>
                 )}
                 {graficoActual.archetype === 'LINEAR_TRANSFORMATION_GRID_2D' && (
-                  <div className="text-[11px] font-mono text-slate-600">
+                  <div className="text-[11px] font-mono text-slate-700">
                     Vector entrada v = [{graficoActual.input_vector.join(', ')}]
                   </div>
                 )}
@@ -646,102 +649,114 @@ export const QuizWorkspace: React.FC<QuizWorkspaceProps> = ({ documentoId }) => 
               />
             </div>
 
-            {/* Dock Inferior con Sliders Interactivos de Math.js */}
-            <div className="w-full bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 sm:px-5 shadow-2xl z-20 shrink-0">
-              <div className="flex flex-col xl:flex-row items-center justify-between gap-3">
-                {/* Controles del Dock */}
-                <div className="flex items-center gap-3 w-full xl:w-auto justify-between xl:justify-start">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400">
-                      <Sliders className="h-4 w-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-bold text-slate-200">
-                        Controles de Simulación (math.js)
-                      </span>
-                      <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        60 FPS (&lt;16ms)
-                      </span>
-                    </div>
+            {/* Dock Inferior con Sliders Interactivos Grandes (Ocupando casi toda el área inferior) */}
+            <div className="w-full bg-white/98 backdrop-blur-md border-t-2 border-slate-300 px-4 py-3.5 sm:px-6 sm:py-4 shadow-xl z-20 shrink-0 space-y-3">
+              {/* Fila superior compacta: Título del Dock + Controles de Capas */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-600">
+                    <Sliders className="h-4 w-4" />
                   </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => setMostrarCapaError((v) => !v)}
-                      title="Mostrar u ocultar trazo diagnóstico de error (#E11D48)"
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors border ${
-                        mostrarCapaError
-                          ? 'bg-rose-500/20 border-rose-500/40 text-rose-300'
-                          : 'bg-slate-800 border-slate-700 text-slate-400'
-                      }`}
-                    >
-                      {mostrarCapaError ? (
-                        <Eye className="h-3.5 w-3.5" />
-                      ) : (
-                        <EyeOff className="h-3.5 w-3.5" />
-                      )}
-                      <span>Hipótesis Error</span>
-                    </button>
-
-                    <button
-                      onClick={() => setMostrarCuadricula((v) => !v)}
-                      title="Mostrar u ocultar cuadrícula cartesiana"
-                      className={`p-1.5 rounded-lg transition-colors border ${
-                        mostrarCuadricula
-                          ? 'bg-sky-500/20 border-sky-500/40 text-sky-300'
-                          : 'bg-slate-800 border-slate-700 text-slate-400'
-                      }`}
-                    >
-                      <Compass className="h-3.5 w-3.5" />
-                    </button>
-
-                    <button
-                      onClick={handleReiniciarSliders}
-                      title="Restablecer sliders a sus valores iniciales"
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors border border-slate-700"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight">
+                    Controles Interactivos de Simulación (math.js)
+                  </span>
+                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    60 FPS
+                  </span>
                 </div>
 
-                {/* Sliders dinámicos definidos en el 2do JSON */}
-                <div className="flex-1 w-full flex flex-wrap items-center justify-end gap-3">
-                  {graficoActual.sliders.map((s) => {
-                    const val = slidersActuales[s.id] ?? s.default;
-                    return (
-                      <div
-                        key={s.id}
-                        className="flex items-center gap-2.5 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800 min-w-[210px] sm:min-w-[240px] flex-1 sm:flex-initial"
-                      >
-                        <div className="px-1.5 py-0.5 rounded bg-sky-500/10 border border-sky-500/20 text-xs font-mono font-bold text-sky-400">
-                          <MathFormula math={`$${s.symbol}$`} />
-                        </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setMostrarCapaError((v) => !v)}
+                    title="Mostrar u ocultar trazo diagnóstico de error (#E11D48)"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors border ${
+                      mostrarCapaError
+                        ? 'bg-rose-50 border-rose-300 text-rose-700'
+                        : 'bg-slate-100 border-slate-300 text-slate-600'
+                    }`}
+                  >
+                    {mostrarCapaError ? (
+                      <Eye className="h-3.5 w-3.5" />
+                    ) : (
+                      <EyeOff className="h-3.5 w-3.5" />
+                    )}
+                    <span>Hipótesis Error</span>
+                  </button>
 
-                        <div className="flex-1 flex flex-col">
-                          <div className="flex items-center justify-between text-[10px] text-slate-400 mb-0.5 gap-2">
-                            <span className="truncate">{s.label}</span>
-                            <span className="font-mono text-slate-200 font-bold">
-                              {Number(val).toFixed(2)}
-                            </span>
-                          </div>
-                          <input
-                            type="range"
-                            min={s.min}
-                            max={s.max}
-                            step={s.step}
-                            value={val}
-                            onChange={(e) =>
-                              handleActualizarSlider(s.id, parseFloat(e.target.value))
-                            }
-                            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400 focus:outline-none"
-                          />
+                  <button
+                    onClick={() => setMostrarCuadricula((v) => !v)}
+                    title="Mostrar u ocultar cuadrícula cartesiana"
+                    className={`p-1.5 rounded-lg transition-colors border ${
+                      mostrarCuadricula
+                        ? 'bg-sky-50 border-sky-300 text-sky-700'
+                        : 'bg-slate-100 border-slate-300 text-slate-600'
+                    }`}
+                  >
+                    <Compass className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    onClick={handleReiniciarSliders}
+                    title="Restablecer sliders a sus valores iniciales"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold transition-colors border border-slate-300"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Reiniciar</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Fila inferior principal: Sliders grandes ocupando todo el ancho disponible */}
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                {graficoActual.sliders.map((s) => {
+                  const val = slidersActuales[s.id] ?? s.default;
+                  const fineStep =
+                    s.id === 'n' || s.symbol === 'n'
+                      ? 1
+                      : s.id === 't' || s.symbol === 't'
+                      ? Math.min(s.step || 0.005, 0.005)
+                      : Math.min(s.step || 0.01, 0.01);
+                  const decimals = s.id === 'n' || s.symbol === 'n' ? 0 : 2;
+
+                  return (
+                    <div
+                      key={s.id}
+                      className="w-full flex items-center gap-3.5 bg-slate-50 px-4 py-3 rounded-2xl border-2 border-slate-300 hover:border-sky-400 transition-colors shadow-2xs"
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-sky-50 border border-sky-300 flex items-center justify-center text-sm sm:text-base font-mono font-extrabold text-sky-700 shrink-0 shadow-2xs">
+                        <MathFormula math={`$${s.symbol}$`} />
+                      </div>
+
+                      <div className="flex-1 flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs sm:text-sm font-bold text-slate-800 truncate">
+                            {s.label}
+                          </span>
+                          <span className="font-mono text-xs sm:text-sm text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-lg font-extrabold">
+                            {Number(val).toFixed(decimals)}
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={s.min}
+                          max={s.max}
+                          step={fineStep}
+                          value={val}
+                          onChange={(e) =>
+                            handleActualizarSlider(s.id, parseFloat(e.target.value))
+                          }
+                          className="w-full projector-slider focus:outline-none"
+                        />
+                        <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                          <span>min: {s.min}</span>
+                          <span>paso: {fineStep}</span>
+                          <span>máx: {s.max}</span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </>
