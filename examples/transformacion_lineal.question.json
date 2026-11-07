@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "question_id": "q_lintr_0001",
+  "graph_id": "g_lintr_0001",
+  "area": "ALGEBRA_LINEAL",
+  "topic": "TRANSFORMACIONES_LINEALES",
+  "difficulty": "BASICO",
+  "question_latex": "Sea $T:\\mathbb{R}^2\\to\\mathbb{R}^2$ la rotación de $90^\\circ$ en sentido antihorario. ¿Cuál es $T(1,2)$?",
+  "options": [
+    {
+      "id": "A",
+      "text_latex": "$(2,-1)$",
+      "is_correct": false
+    },
+    {
+      "id": "B",
+      "text_latex": "$(-2,1)$",
+      "is_correct": true
+    },
+    {
+      "id": "C",
+      "text_latex": "$(-1,2)$",
+      "is_correct": false
+    },
+    {
+      "id": "D",
+      "text_latex": "$(2,1)$",
+      "is_correct": false
+    }
+  ],
+  "correct_option_id": "B",
+  "explanation": "La rotación antihoraria de 90° lleva e1 a (0,1) y e2 a (-1,0), por lo que su matriz es [[0,-1],[1,0]] y T(1,2) = (-2,1). Confundir el sentido de giro, reflejar o intercambiar coordenadas produce los otros resultados."
+}

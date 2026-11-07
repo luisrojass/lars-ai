@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "graph_id": "g_lintr_0001",
+  "question_id": "q_lintr_0001",
+  "scenario": "LINEAR_TRANSFORM_2D",
+  "views": [
+    {
+      "option_id": "A",
+      "is_correct": false,
+      "caption": "Giro horario: (2,-1)",
+      "scene": {
+        "scenario": "LINEAR_TRANSFORM_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -4,
+            4
+          ],
+          "range": [
+            -4,
+            4
+          ]
+        },
+        "matrix": [
+          [
+            0,
+            1
+          ],
+          [
+            -1,
+            0
+          ]
+        ],
+        "transform_kind": "ROTATION",
+        "vectors": [
+          {
+            "label": "v",
+            "v": [
+              1,
+              2
+            ]
+          }
+        ],
+        "show_unit_square": true,
+        "show_basis": true
+      }
+    },
+    {
+      "option_id": "B",
+      "is_correct": true,
+      "caption": "Giro antihorario: (-2,1)",
+      "scene": {
+        "scenario": "LINEAR_TRANSFORM_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -4,
+            4
+          ],
+          "range": [
+            -4,
+            4
+          ]
+        },
+        "matrix": [
+          [
+            0,
+            -1
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "transform_kind": "ROTATION",
+        "vectors": [
+          {
+            "label": "v",
+            "v": [
+              1,
+              2
+            ]
+          }
+        ],
+        "show_unit_square": true,
+        "show_basis": true
+      }
+    },
+    {
+      "option_id": "C",
+      "is_correct": false,
+      "caption": "Reflexión en el eje y: (-1,2)",
+      "scene": {
+        "scenario": "LINEAR_TRANSFORM_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -4,
+            4
+          ],
+          "range": [
+            -4,
+            4
+          ]
+        },
+        "matrix": [
+          [
+            -1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "transform_kind": "REFLECTION",
+        "vectors": [
+          {
+            "label": "v",
+            "v": [
+              1,
+              2
+            ]
+          }
+        ],
+        "show_unit_square": true,
+        "show_basis": true
+      }
+    },
+    {
+      "option_id": "D",
+      "is_correct": false,
+      "caption": "Intercambio de coordenadas: (2,1)",
+      "scene": {
+        "scenario": "LINEAR_TRANSFORM_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -4,
+            4
+          ],
+          "range": [
+            -4,
+            4
+          ]
+        },
+        "matrix": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "transform_kind": "REFLECTION",
+        "vectors": [
+          {
+            "label": "v",
+            "v": [
+              1,
+              2
+            ]
+          }
+        ],
+        "show_unit_square": true,
+        "show_basis": true
+      }
+    }
+  ]
+}

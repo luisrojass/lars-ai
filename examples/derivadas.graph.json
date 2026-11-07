@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "graph_id": "g_deriv_0001",
+  "question_id": "q_deriv_0001",
+  "scenario": "DERIVATIVE_2D",
+  "views": [
+    {
+      "option_id": "A",
+      "is_correct": false,
+      "caption": "Pendiente 2: tangente demasiado plana",
+      "scene": {
+        "scenario": "DERIVATIVE_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -1,
+            4
+          ],
+          "range": [
+            -2,
+            8
+          ]
+        },
+        "fn": "x^2",
+        "derivative_fn": "2*x",
+        "x0": 2,
+        "slope": 2,
+        "show_tangent": true
+      }
+    },
+    {
+      "option_id": "B",
+      "is_correct": true,
+      "caption": "Pendiente 4: tangente verdadera",
+      "scene": {
+        "scenario": "DERIVATIVE_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -1,
+            4
+          ],
+          "range": [
+            -2,
+            8
+          ]
+        },
+        "fn": "x^2",
+        "derivative_fn": "2*x",
+        "x0": 2,
+        "slope": 4,
+        "show_tangent": true
+      }
+    },
+    {
+      "option_id": "C",
+      "is_correct": false,
+      "caption": "Pendiente 8: tangente demasiado inclinada",
+      "scene": {
+        "scenario": "DERIVATIVE_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -1,
+            4
+          ],
+          "range": [
+            -2,
+            8
+          ]
+        },
+        "fn": "x^2",
+        "derivative_fn": "2*x",
+        "x0": 2,
+        "slope": 8,
+        "show_tangent": true
+      }
+    },
+    {
+      "option_id": "D",
+      "is_correct": false,
+      "caption": "Pendiente -1/4: recta normal, no tangente",
+      "scene": {
+        "scenario": "DERIVATIVE_2D",
+        "renderer": "mafs",
+        "viewport": {
+          "domain": [
+            -1,
+            4
+          ],
+          "range": [
+            -2,
+            8
+          ]
+        },
+        "fn": "x^2",
+        "derivative_fn": "2*x",
+        "x0": 2,
+        "slope": -0.25,
+        "show_tangent": true
+      }
+    }
+  ]
+}

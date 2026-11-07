@@ -1,0 +1,475 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lars-ai/schemas/graph.schema.json",
+  "title": "GraphPayload",
+  "description": "JSON #2: datos declarativos para graficar en el frontend (Mafs 2D / Three.js 3D). Se genera en paralelo con question.schema.json y se enlaza por graph_id. Nunca contiene código ejecutable: solo expresiones matemáticas en la gramática segura definida en $defs/expr.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "graph_id", "question_id", "scenario", "views"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "graph_id": { "type": "string", "pattern": "^[a-z0-9_-]{6,64}$" },
+    "question_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]{6,64}$",
+      "description": "Debe igualar question_id del JSON #1."
+    },
+    "scenario": {
+      "enum": [
+        "LIMIT_2D",
+        "DERIVATIVE_2D",
+        "INTEGRAL_INDEFINITE_2D",
+        "INTEGRAL_DEFINITE_2D",
+        "MATRIX_OPERATION_2D",
+        "LINEAR_TRANSFORM_2D",
+        "LINEAR_TRANSFORM_3D",
+        "VECTORS_2D",
+        "VECTORS_3D"
+      ],
+      "description": "Escenario gráfico. Todas las views deben usar el mismo scenario."
+    },
+    "views": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "Una vista por opción (A, B, C, D, en ese orden). La vista de la opción correcta muestra la situación verdadera; las otras muestran lo que ocurriría si el error conceptual de esa opción fuera cierto.",
+      "prefixItems": [
+        { "$ref": "#/$defs/view_A" },
+        { "$ref": "#/$defs/view_B" },
+        { "$ref": "#/$defs/view_C" },
+        { "$ref": "#/$defs/view_D" }
+      ],
+      "items": false
+    }
+  },
+  "$defs": {
+    "expr": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[0-9a-zA-Z_+\\-*/^().,\\s]+$",
+      "description": "Expresión en sintaxis math.js restringida. Variable independiente: x (o t). Constantes: pi, e. Funciones permitidas: sin cos tan asin acos atan sinh cosh tanh exp log ln sqrt abs. Operadores: + - * / ^ y paréntesis. Prohibido: asignaciones, funciones definidas por el usuario, cualquier otro identificador."
+    },
+    "num": { "type": "number" },
+    "interval": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number" },
+      "description": "[min, max] con min < max."
+    },
+    "vec2": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } },
+    "vec3": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number" } },
+    "mat2": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/vec2" },
+      "description": "Matriz 2x2 por filas: [[a,b],[c,d]]."
+    },
+    "mat3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/vec3" },
+      "description": "Matriz 3x3 por filas."
+    },
+    "label": { "type": "string", "minLength": 1, "maxLength": 40 },
+
+    "view_base": {
+      "type": "object",
+      "required": ["option_id", "is_correct", "caption", "scene"],
+      "properties": {
+        "option_id": { "enum": ["A", "B", "C", "D"] },
+        "is_correct": { "type": "boolean" },
+        "caption": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Texto corto bajo el gráfico (≤ 120 caracteres)."
+        },
+        "scene": { "$ref": "#/$defs/scene" }
+      },
+      "additionalProperties": false
+    },
+    "view_A": { "allOf": [{ "$ref": "#/$defs/view_base" }, { "properties": { "option_id": { "const": "A" } } }] },
+    "view_B": { "allOf": [{ "$ref": "#/$defs/view_base" }, { "properties": { "option_id": { "const": "B" } } }] },
+    "view_C": { "allOf": [{ "$ref": "#/$defs/view_base" }, { "properties": { "option_id": { "const": "C" } } }] },
+    "view_D": { "allOf": [{ "$ref": "#/$defs/view_base" }, { "properties": { "option_id": { "const": "D" } } }] },
+
+    "scene": {
+      "oneOf": [
+        { "$ref": "#/$defs/LIMIT_2D" },
+        { "$ref": "#/$defs/DERIVATIVE_2D" },
+        { "$ref": "#/$defs/INTEGRAL_INDEFINITE_2D" },
+        { "$ref": "#/$defs/INTEGRAL_DEFINITE_2D" },
+        { "$ref": "#/$defs/MATRIX_OPERATION_2D" },
+        { "$ref": "#/$defs/LINEAR_TRANSFORM_2D" },
+        { "$ref": "#/$defs/LINEAR_TRANSFORM_3D" },
+        { "$ref": "#/$defs/VECTORS_2D" },
+        { "$ref": "#/$defs/VECTORS_3D" }
+      ]
+    },
+
+    "viewport2d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "range"],
+      "properties": {
+        "domain": { "$ref": "#/$defs/interval" },
+        "range": { "$ref": "#/$defs/interval" }
+      }
+    },
+
+    "LIMIT_2D": {
+      "type": "object",
+      "description": "Cálculo diferencial - límites de una variable (finito, en un punto, lateral, infinito).",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "fn", "approach_x", "side", "limit", "hole"],
+      "properties": {
+        "scenario": { "const": "LIMIT_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "fn": { "$ref": "#/$defs/expr" },
+        "fn_piecewise": {
+          "type": "array",
+          "maxItems": 3,
+          "description": "Opcional: función a trozos. Si existe, sustituye a fn (que se conserva como referencia).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["expr", "domain", "include_start", "include_end"],
+            "properties": {
+              "expr": { "$ref": "#/$defs/expr" },
+              "domain": { "$ref": "#/$defs/interval" },
+              "include_start": { "type": "boolean" },
+              "include_end": { "type": "boolean" }
+            }
+          }
+        },
+        "approach_x": { "type": "number", "description": "Punto a donde tiende x." },
+        "side": { "enum": ["BOTH", "LEFT", "RIGHT"] },
+        "limit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "enum": ["FINITE", "POS_INFINITY", "NEG_INFINITY", "DOES_NOT_EXIST"] },
+            "value": { "type": "number", "description": "Obligatorio si kind=FINITE." }
+          },
+          "if": { "properties": { "kind": { "const": "FINITE" } } },
+          "then": { "required": ["value"] }
+        },
+        "hole": {
+          "type": "boolean",
+          "description": "true: dibuja círculo abierto en (approach_x, limit.value)."
+        },
+        "vertical_asymptotes": { "type": "array", "maxItems": 3, "items": { "type": "number" } },
+        "horizontal_asymptotes": { "type": "array", "maxItems": 2, "items": { "type": "number" } },
+        "show_approach_points": {
+          "type": "boolean",
+          "description": "Anima puntos que se acercan a approach_x."
+        }
+      }
+    },
+
+    "DERIVATIVE_2D": {
+      "type": "object",
+      "description": "Cálculo diferencial - derivadas: pendiente, recta tangente, razón de cambio, puntos críticos.",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "fn", "x0", "slope", "show_tangent"],
+      "properties": {
+        "scenario": { "const": "DERIVATIVE_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "fn": { "$ref": "#/$defs/expr" },
+        "derivative_fn": {
+          "$ref": "#/$defs/expr",
+          "description": "f'(x) simbólica; si se incluye, el frontend puede graficarla en punteado."
+        },
+        "x0": { "type": "number" },
+        "slope": { "type": "number", "description": "Valor de f'(x0) que ilustra esta vista." },
+        "show_tangent": { "type": "boolean" },
+        "secant_h": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Opcional: muestra la secante entre x0 y x0+h."
+        },
+        "critical_points": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "kind"],
+            "properties": {
+              "x": { "type": "number" },
+              "kind": { "enum": ["MAX", "MIN", "INFLECTION"] }
+            }
+          }
+        },
+        "sliders": { "$ref": "#/$defs/sliders" }
+      }
+    },
+
+    "INTEGRAL_INDEFINITE_2D": {
+      "type": "object",
+      "description": "Cálculo integral - integral indefinida: integrando y familia de primitivas F(x)+C.",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "fn", "antiderivative", "constants"],
+      "properties": {
+        "scenario": { "const": "INTEGRAL_INDEFINITE_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "fn": { "$ref": "#/$defs/expr", "description": "Integrando f(x)." },
+        "antiderivative": {
+          "$ref": "#/$defs/expr",
+          "description": "F(x) SIN constante de integración."
+        },
+        "constants": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "type": "number" },
+          "description": "Valores de C a dibujar: se grafica F(x)+C para cada uno."
+        },
+        "show_integrand": { "type": "boolean" },
+        "sliders": { "$ref": "#/$defs/sliders" }
+      }
+    },
+
+    "INTEGRAL_DEFINITE_2D": {
+      "type": "object",
+      "description": "Cálculo integral - integral definida: área bajo la curva entre a y b, opcional suma de Riemann.",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "fn", "a", "b", "value"],
+      "properties": {
+        "scenario": { "const": "INTEGRAL_DEFINITE_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "fn": { "$ref": "#/$defs/expr" },
+        "a": { "type": "number" },
+        "b": { "type": "number", "description": "Debe cumplirse a < b." },
+        "value": { "type": "number", "description": "Valor numérico de la integral que ilustra esta vista." },
+        "riemann": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "n"],
+          "properties": {
+            "method": { "enum": ["LEFT", "RIGHT", "MIDPOINT", "TRAPEZOID"] },
+            "n": { "type": "integer", "minimum": 1, "maximum": 100 }
+          }
+        },
+        "sliders": { "$ref": "#/$defs/sliders" }
+      }
+    },
+
+    "MATRIX_OPERATION_2D": {
+      "type": "object",
+      "description": "Álgebra lineal - operaciones matriciales con matrices 2x2, visualizadas como efecto sobre el cuadrado unitario. (Matrices >2x2 se plantean solo en texto, sin gráfico.)",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "operation", "matrices", "result"],
+      "properties": {
+        "scenario": { "const": "MATRIX_OPERATION_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "operation": {
+          "enum": ["ADD", "SCALAR_MULTIPLY", "MULTIPLY", "TRANSPOSE", "DETERMINANT", "INVERSE"]
+        },
+        "matrices": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["A"],
+          "properties": {
+            "A": { "$ref": "#/$defs/mat2" },
+            "B": { "$ref": "#/$defs/mat2", "description": "Requerida en ADD y MULTIPLY." },
+            "k": { "type": "number", "description": "Requerido en SCALAR_MULTIPLY." }
+          }
+        },
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "matrix": { "$ref": "#/$defs/mat2" },
+            "scalar": { "type": "number", "description": "Para DETERMINANT." }
+          }
+        },
+        "show_steps": {
+          "type": "boolean",
+          "description": "En MULTIPLY: muestra primero B y luego A (composición)."
+        },
+        "show_det_area": {
+          "type": "boolean",
+          "description": "Resalta el área con signo del paralelogramo imagen (det)."
+        }
+      }
+    },
+
+    "LINEAR_TRANSFORM_2D": {
+      "type": "object",
+      "description": "Álgebra lineal - transformación lineal T(v)=Mv en R2.",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "matrix", "vectors"],
+      "properties": {
+        "scenario": { "const": "LINEAR_TRANSFORM_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "matrix": { "$ref": "#/$defs/mat2" },
+        "transform_kind": {
+          "enum": ["ROTATION", "REFLECTION", "SCALING", "SHEAR", "PROJECTION", "GENERAL"],
+          "description": "Etiqueta informativa."
+        },
+        "vectors": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "v"],
+            "properties": { "label": { "$ref": "#/$defs/label" }, "v": { "$ref": "#/$defs/vec2" } }
+          },
+          "description": "Vectores de entrada; el frontend dibuja v y M·v."
+        },
+        "show_unit_square": { "type": "boolean" },
+        "show_basis": { "type": "boolean" },
+        "eigenvectors": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["v", "lambda"],
+            "properties": { "v": { "$ref": "#/$defs/vec2" }, "lambda": { "type": "number" } }
+          }
+        }
+      }
+    },
+
+    "LINEAR_TRANSFORM_3D": {
+      "type": "object",
+      "description": "Álgebra lineal - transformación lineal en R3 (Three.js).",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "bounds", "matrix", "vectors"],
+      "properties": {
+        "scenario": { "const": "LINEAR_TRANSFORM_3D" },
+        "renderer": { "const": "threejs" },
+        "bounds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Los ejes van de -bounds a +bounds."
+        },
+        "matrix": { "$ref": "#/$defs/mat3" },
+        "vectors": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "v"],
+            "properties": { "label": { "$ref": "#/$defs/label" }, "v": { "$ref": "#/$defs/vec3" } }
+          }
+        },
+        "show_unit_cube": { "type": "boolean" },
+        "show_basis": { "type": "boolean" }
+      }
+    },
+
+    "vector_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "role"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,15}$" },
+        "label": { "$ref": "#/$defs/label" },
+        "components": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "origin": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "type": "number" },
+          "description": "Punto de aplicación; por defecto el origen."
+        },
+        "role": { "enum": ["INPUT", "RESULT", "AUXILIARY"] },
+        "unit": { "type": "string", "maxLength": 12, "description": "Ej.: N, m/s, m." }
+      }
+    },
+
+    "VECTORS_2D": {
+      "type": "object",
+      "description": "Física - vectores en el plano (fuerzas, velocidades, desplazamientos).",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "viewport", "operation", "vectors", "result"],
+      "properties": {
+        "scenario": { "const": "VECTORS_2D" },
+        "renderer": { "const": "mafs" },
+        "viewport": { "$ref": "#/$defs/viewport2d" },
+        "operation": {
+          "enum": ["SUM", "DIFFERENCE", "SCALAR_MULTIPLE", "DOT_PRODUCT", "PROJECTION", "COMPONENTS", "MAGNITUDE_DIRECTION"]
+        },
+        "vectors": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/vector_item" } },
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vector_id": { "type": "string", "description": "id del vector RESULT en vectors." },
+            "scalar": { "type": "number" },
+            "angle_deg": { "type": "number" }
+          }
+        },
+        "show_parallelogram": { "type": "boolean" },
+        "show_tip_to_tail": { "type": "boolean" },
+        "show_angle_arc": { "type": "boolean" }
+      }
+    },
+
+    "VECTORS_3D": {
+      "type": "object",
+      "description": "Física - vectores en el espacio (Three.js). Incluye producto cruz.",
+      "additionalProperties": false,
+      "required": ["scenario", "renderer", "bounds", "operation", "vectors", "result"],
+      "properties": {
+        "scenario": { "const": "VECTORS_3D" },
+        "renderer": { "const": "threejs" },
+        "bounds": { "type": "number", "exclusiveMinimum": 0 },
+        "operation": {
+          "enum": ["SUM", "DIFFERENCE", "SCALAR_MULTIPLE", "DOT_PRODUCT", "CROSS_PRODUCT", "PROJECTION", "COMPONENTS", "MAGNITUDE_DIRECTION"]
+        },
+        "vectors": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/vector_item" } },
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vector_id": { "type": "string" },
+            "scalar": { "type": "number" },
+            "angle_deg": { "type": "number" }
+          }
+        },
+        "show_parallelogram": { "type": "boolean" },
+        "show_tip_to_tail": { "type": "boolean" }
+      }
+    },
+
+    "sliders": {
+      "type": "array",
+      "maxItems": 2,
+      "description": "Parámetros interactivos opcionales. El símbolo puede usarse dentro de expresiones.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["symbol", "label", "min", "max", "step", "default"],
+        "properties": {
+          "symbol": { "type": "string", "pattern": "^[a-z]$", "not": { "enum": ["x", "t", "e"] } },
+          "label": { "$ref": "#/$defs/label" },
+          "min": { "type": "number" },
+          "max": { "type": "number" },
+          "step": { "type": "number", "exclusiveMinimum": 0 },
+          "default": { "type": "number" }
+        }
+      }
+    }
+  }
+}

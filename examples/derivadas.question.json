@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "question_id": "q_deriv_0001",
+  "graph_id": "g_deriv_0001",
+  "area": "CALCULO_DIFERENCIAL",
+  "topic": "DERIVADAS",
+  "difficulty": "BASICO",
+  "question_latex": "Sea $f(x)=x^2$. ¿Cuál es la pendiente de la recta tangente a la gráfica de $f$ en $x=2$?",
+  "options": [
+    {
+      "id": "A",
+      "text_latex": "$2$",
+      "is_correct": false
+    },
+    {
+      "id": "B",
+      "text_latex": "$4$",
+      "is_correct": true
+    },
+    {
+      "id": "C",
+      "text_latex": "$8$",
+      "is_correct": false
+    },
+    {
+      "id": "D",
+      "text_latex": "$-\\tfrac{1}{4}$",
+      "is_correct": false
+    }
+  ],
+  "correct_option_id": "B",
+  "explanation": "La derivada de $x^2$ es $2x$, así que en $x=2$ la pendiente es 4. Compara las rectas: solo la tangente verdadera toca la parábola en un único punto. ¿Notas que derivar no es evaluar la función ni calcular la pendiente de la normal?"
+}

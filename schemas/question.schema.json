@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lars-ai/schemas/question.schema.json",
+  "title": "QuestionPayload",
+  "description": "JSON #1: una sola pregunta de opción múltiple (4 opciones, 1 correcta) con una explicación corta. No contiene datos de graficación; se enlaza con el JSON #2 mediante graph_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "question_id",
+    "graph_id",
+    "area",
+    "topic",
+    "difficulty",
+    "question_latex",
+    "options",
+    "correct_option_id",
+    "explanation"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "question_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]{6,64}$",
+      "description": "Identificador único de la pregunta."
+    },
+    "graph_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]{6,64}$",
+      "description": "Debe ser igual al graph_id del JSON #2 (graph.schema.json)."
+    },
+    "area": {
+      "enum": [
+        "CALCULO_DIFERENCIAL",
+        "CALCULO_INTEGRAL",
+        "ALGEBRA_LINEAL",
+        "FISICA_VECTORES"
+      ]
+    },
+    "topic": {
+      "enum": [
+        "LIMITES",
+        "DERIVADAS",
+        "INTEGRAL_INDEFINIDA",
+        "INTEGRAL_DEFINIDA",
+        "OPERACIONES_MATRICIALES",
+        "TRANSFORMACIONES_LINEALES",
+        "VECTORES_FISICA"
+      ],
+      "description": "Debe ser coherente con area (ver README: tabla area -> topic -> scenario)."
+    },
+    "difficulty": { "enum": ["BASICO", "INTERMEDIO"] },
+    "question_latex": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 600,
+      "description": "Enunciado en español; fórmulas en LaTeX entre $...$."
+    },
+    "options": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "Exactamente 4 opciones, ids A, B, C, D en ese orden.",
+      "prefixItems": [
+        { "$ref": "#/$defs/option_A" },
+        { "$ref": "#/$defs/option_B" },
+        { "$ref": "#/$defs/option_C" },
+        { "$ref": "#/$defs/option_D" }
+      ],
+      "items": false
+    },
+    "correct_option_id": {
+      "enum": ["A", "B", "C", "D"],
+      "description": "Debe coincidir con la única opción con is_correct=true."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Explicación corta, clara y socrática de por qué la opción correcta lo es y cuál es el error conceptual típico. EXACTAMENTE entre 30 y 50 palabras (validado por código, JSON Schema no cuenta palabras).",
+      "minLength": 150,
+      "maxLength": 400
+    }
+  },
+  "$defs": {
+    "option_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text_latex", "is_correct"],
+      "properties": {
+        "id": { "enum": ["A", "B", "C", "D"] },
+        "text_latex": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "is_correct": { "type": "boolean" }
+      }
+    },
+    "option_A": {
+      "allOf": [
+        { "$ref": "#/$defs/option_base" },
+        { "properties": { "id": { "const": "A" } } }
+      ]
+    },
+    "option_B": {
+      "allOf": [
+        { "$ref": "#/$defs/option_base" },
+        { "properties": { "id": { "const": "B" } } }
+      ]
+    },
+    "option_C": {
+      "allOf": [
+        { "$ref": "#/$defs/option_base" },
+        { "properties": { "id": { "const": "C" } } }
+      ]
+    },
+    "option_D": {
+      "allOf": [
+        { "$ref": "#/$defs/option_base" },
+        { "properties": { "id": { "const": "D" } } }
+      ]
+    }
+  }
+}
