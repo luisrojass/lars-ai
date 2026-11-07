@@ -19,7 +19,7 @@ export async function pdfToMarkdown(pdf: Buffer): Promise<string> {
 
   const ai = new GoogleGenAI({ apiKey });
   const res = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
+    model: process.env.GEMINI_MODEL ?? "gemini-3-flash-preview",
     contents: [
       {
         role: "user",

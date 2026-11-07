@@ -10,6 +10,18 @@ export interface MathFormulaProps {
   className?: string;
 }
 
+function safeRenderKatex(latex: string, displayMode: boolean): string | null {
+  try {
+    return katex.renderToString(latex, {
+      displayMode,
+      throwOnError: false,
+      output: 'htmlAndMathml'
+    });
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Componente KaTeX de alto rendimiento y cero fallos para notación matemática.
  * Soporta tanto strings puros de TeX como texto mixto con delimitadores $...$ y $$...$$
@@ -38,16 +50,11 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
     const containsDelimiters = content.includes('$');
 
     if (!containsDelimiters) {
-      try {
-        const html = katex.renderToString(content, {
-          displayMode: block,
-          throwOnError: false,
-          output: 'htmlAndMathml'
-        });
+      const html = safeRenderKatex(content, block);
+      if (html) {
         return <span dangerouslySetInnerHTML={{ __html: html }} />;
-      } catch {
-        return <code>{content}</code>;
       }
+      return <code>{content}</code>;
     }
 
     // Procesar texto mixto con partes de texto y partes matemáticas
@@ -56,11 +63,8 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
     return parts.map((part, idx) => {
       if (part.startsWith('$$') && part.endsWith('$$')) {
         const tex = part.slice(2, -2).trim();
-        try {
-          const html = katex.renderToString(tex, {
-            displayMode: true,
-            throwOnError: false
-          });
+        const html = safeRenderKatex(tex, true);
+        if (html) {
           return (
             <span
               key={idx}
@@ -68,16 +72,12 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
               dangerouslySetInnerHTML={{ __html: html }}
             />
           );
-        } catch {
-          return <code key={idx}>{part}</code>;
         }
+        return <code key={idx}>{part}</code>;
       } else if (part.startsWith('$') && part.endsWith('$')) {
         const tex = part.slice(1, -1).trim();
-        try {
-          const html = katex.renderToString(tex, {
-            displayMode: false,
-            throwOnError: false
-          });
+        const html = safeRenderKatex(tex, false);
+        if (html) {
           return (
             <span
               key={idx}
@@ -85,9 +85,8 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
               dangerouslySetInnerHTML={{ __html: html }}
             />
           );
-        } catch {
-          return <code key={idx}>{part}</code>;
         }
+        return <code key={idx}>{part}</code>;
       }
       return <React.Fragment key={idx}>{part}</React.Fragment>;
     });

@@ -42,7 +42,7 @@ export const Canvas2DMafs: React.FC<Canvas2DMafsProps> = ({
       style={{
         backgroundColor: '#F8FAFC',
         // Inyección de variables CSS de Mafs para forzar Modo Claro Proyector
-        // @ts-ignore
+        // @ts-expect-error Mafs custom CSS variables
         '--mafs-bg': '#F8FAFC',
         '--mafs-fg': '#334155',
         '--mafs-origin-color': '#334155',
