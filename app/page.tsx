@@ -1,69 +1,125 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React from 'react';
+import Link from 'next/link';
+import { MathFormula } from '@/components/math/MathFormula';
+import {
+  Sparkles,
+  ArrowRight,
+  Brain,
+  Projector,
+  Zap,
+  BookOpen,
+  ShieldCheck
+} from 'lucide-react';
+
+export default function IntroPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="min-h-[calc(100vh-3.5rem)] w-full bg-slate-950 text-slate-100 flex flex-col justify-between">
+      {/* Hero Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-12 flex-1 flex flex-col items-center justify-center text-center space-y-8">
+        {/* Badge de Plataforma ENEISOFT XVI */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-sky-500/10 via-teal-500/10 to-indigo-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono shadow-sm">
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>ENEISOFT XVI • Plataforma de Estudio Activo</span>
+        </div>
+
+        {/* Título Principal Minimalista */}
+        <div className="space-y-4 max-w-4xl">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            Aprende Matemáticas y Ciencias con{' '}
+            <span className="bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+              Visualizaciones 3B1B
+            </span>{' '}
+            y Método Socrático
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-sm sm:text-lg text-slate-400 max-w-2xl mx-auto font-normal leading-relaxed">
+            Plataforma interactiva con pantalla dividida 40/60. Razona con el motor
+            socrático <strong className="text-slate-200">Thea Engine</strong> y manipula
+            geometría interactiva en alta fidelidad a 60 FPS sin latencia de red.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Mini Preview de Fórmulas KaTeX */}
+        <div className="flex flex-wrap items-center justify-center gap-3 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300 shadow-inner">
+          <span className="text-slate-500 text-[11px]">Modelado en vivo:</span>
+          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-sky-300">
+            <MathFormula math="f(x) = \sin(kx)" />
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-teal-300">
+            <MathFormula math="T(\vec{v}) = \lambda \vec{v}" />
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-indigo-300">
+            <MathFormula math="g''(x) = (4a^2 x^2 - 2a)e^{-ax^2}" />
+          </span>
         </div>
-      </main>
-    </div>
+
+        {/* Botones de Navegación y Demostración Rápida */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md pt-2">
+          <Link
+            href="/workspace"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 via-teal-400 to-sky-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/25 hover:scale-103 hover:shadow-sky-500/40 transition-all"
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Lanzar Demostración Interactiva</span>
+            <ArrowRight className="h-4 w-4 ml-0.5" />
+          </Link>
+
+          <Link
+            href="/login"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold text-sm border border-slate-800 hover:border-slate-700 transition-all"
+          >
+            <ShieldCheck className="h-4 w-4 text-sky-400" />
+            <span>Iniciar Sesión de Prueba</span>
+          </Link>
+        </div>
+
+        {/* Cuadrícula de Características Técnicas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-5xl w-full pt-10">
+          {/* Tarjeta 1 */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2 hover:border-sky-500/30 transition-colors">
+            <div className="flex items-center gap-2 text-sky-400">
+              <Brain className="h-4 w-4" />
+              <h3 className="text-sm font-bold text-slate-100">Thea Engine & KaTeX</h3>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Formulación rigurosa con KaTeX y explicaciones socráticas inmediatas (30-50 palabras)
+              que guían el razonamiento reflexivo ante cada elección.
+            </p>
+          </div>
+
+          {/* Tarjeta 2 */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2 hover:border-teal-500/30 transition-colors">
+            <div className="flex items-center gap-2 text-teal-400">
+              <Projector className="h-4 w-4" />
+              <h3 className="text-sm font-bold text-slate-100">Lienzo Proyector 3B1B</h3>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Fondo claro <code className="text-teal-300">#F8FAFC</code>, ejes de alto contraste,
+              curva solución cian continua (3.5px) y trazo diagnóstico punteado en rojo carmesí.
+            </p>
+          </div>
+
+          {/* Tarjeta 3 */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2 hover:border-indigo-500/30 transition-colors">
+            <div className="flex items-center gap-2 text-indigo-400">
+              <Zap className="h-4 w-4" />
+              <h3 className="text-sm font-bold text-slate-100">Cero Latencia & Math.js</h3>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Principio Zero-Wait con cálculo en memoria local y deslizadores a 60 FPS
+              mediante compilación segura <code className="text-indigo-300">math.compile()</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Minimalista */}
+      <footer className="border-t border-slate-900 py-4 px-6 text-center text-xs text-slate-500">
+        <p>ENEISOFT XVI • Active Learning Architecture • Next.js App Router + TypeScript + Zustand + Mafs + Three.js</p>
+      </footer>
+    </main>
   );
 }
